@@ -43,6 +43,23 @@ if (exists('inch2m') == FALSE) { attach(UC) }
 
 
 # =============================================================================
+# Dimensionless Number
+# =============================================================================
+if (exists('Reynolds') == TRUE) { detach(DN) }
+
+DN <- list(
+  
+  # specificHeat: J/Kg-K, viscosity: N-s/m2, thermal conductivity: W/m-K
+  Prandtl = function(specificHeat, viscosity, thermalConductivity) {
+    (specificHeat * viscosity) / thermalConductivity
+  },
+  
+  Reynolds = function(density, v, L, viscosity) { density * v * L / viscosity }
+)
+
+if (exists('Reynolds') == FALSE) { attach(DN) }
+
+# =============================================================================
 # IO clipboard
 # =============================================================================
 rcbmat <- function(header, ...) {
@@ -63,6 +80,10 @@ wcbmat <- function(data, header, sep="\t", row.names=FALSE, qmethod="double",
 m.crev <- function(mat) { mat[,ncol(mat):1] }
 m.rrev <- function(mat) { mat[nrow(mat):1,] }
 
+# =============================================================================
+# Data Frame
+# =============================================================================
+df.orderBy <- function(df, colname) { df[order(df[,colname]),] }
 
 # =============================================================================
 # Functions for debug log.
