@@ -11,6 +11,11 @@ cpf.DarcyWeisbach <- function(fD, density, velocity, D) {
   fd * density * (velocity ^ 2) / (2 * D)
 }
 
+cpf.WallShearStress <- function(D, dp_dL) {
+  D * dp_dL
+}
+
+
 # =============================================================================
 # Friction Factor.
 # =============================================================================
@@ -58,9 +63,20 @@ cpf.ff <- (function(){
 # Drift Flux Model.
 # =============================================================================
 
-cpf.dfm <- (function(){
+cpf.dfm <- function(C0, Vgj, vsg, vsl) {
+  vmix <- vsg + vsl
+  vg <- vmix + Vgj
+  Hl <- 1 - (vsg / vg)
+  vl <- vsg / Hl
+  
+  c(Hl = Hl, vg=vg, vl=vl)
+}
+
+cpf.dfm.C0 <- list(
+  bubble = function(densityG, densityL) {
+    
+  }
   
   
-  
-})()
+)
 

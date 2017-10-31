@@ -49,12 +49,19 @@ if (exists('Reynolds') == TRUE) { detach(DN) }
 
 DN <- list(
   
+  Weber = function(density, v, L, surfaceTension) {
+    density * (v^2) * L / surfaceTension
+  },
+  
   # specificHeat: J/Kg-K, viscosity: N-s/m2, thermal conductivity: W/m-K
   Prandtl = function(specificHeat, viscosity, thermalConductivity) {
     (specificHeat * viscosity) / thermalConductivity
   },
   
-  Reynolds = function(density, v, L, viscosity) { density * v * L / viscosity }
+  Reynolds = function(density, v, L, viscosity) {
+    density * v * L / viscosity
+  }
+  
 )
 
 if (exists('Reynolds') == FALSE) { attach(DN) }

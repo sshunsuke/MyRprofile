@@ -44,9 +44,9 @@ plotMats2 <- function(mats, xlab='X', ylab='Y', main=NULL, type='l', log='',
 # Probability
 # =============================================================================
 # Create a matrix of information of cumulative distribution.
-cum.probability <- function(values, do=FALSE) {
+cum.probability <- function(values, decreasing=FALSE) {
   len <- length(values)
-  cbind(X = sort(values, decreasing=do), cum.prob = (1:len)/len)
+  cbind(X = sort(values, decreasing=decreasing), cum.prob = (1:len)/len)
 }
 
 
