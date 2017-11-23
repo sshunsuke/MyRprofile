@@ -27,6 +27,9 @@ Tntp <- 293.15    # (K)
 if (exists('inch2m') == TRUE) { detach(UC) }
 
 UC <- list(
+  rad2deg = function(rad) { rad * 180 / pi},
+  deg2rad = function(deg) { deg * pi / 180},
+  
   inch2m = function(inch) { inch * 0.0254 },
   m2inch = function(m) { m / 0.0254 },
   ft2m   = function(ft) { ft * 0.3048 },
@@ -47,22 +50,41 @@ if (exists('inch2m') == FALSE) { attach(UC) }
 # =============================================================================
 if (exists('Reynolds') == TRUE) { detach(DN) }
 
-DN <- list(
+DN <- (function(){
   
-  Weber = function(density, v, L, surfaceTension) {
-    density * (v^2) * L / surfaceTension
-  },
-  
-  # specificHeat: J/Kg-K, viscosity: N-s/m2, thermal conductivity: W/m-K
-  Prandtl = function(specificHeat, viscosity, thermalConductivity) {
-    (specificHeat * viscosity) / thermalConductivity
-  },
-  
-  Reynolds = function(density, v, L, viscosity) {
-    density * v * L / viscosity
+  # Eotvos number (also called the Bond number)
+  #   dDensity: difference in density f the two phase [kg/m3]
+  Eo_Bo <- function(dDensity, L, surfaceTension) {
+    (dDensity * g * L^2) / surfaceTension
   }
   
-)
+  
+  list(
+    
+    # We: [= "inertia" / "surface tension"]
+    Weber = function(density, v, L, surfaceTension) {
+      density * (v^2) * L / surfaceTension
+    },
+    
+    # specificHeat: J/Kg-K, viscosity: N-s/m2, thermal conductivity: W/m-K
+    Prandtl = function(specificHeat, viscosity, thermalConductivity) {
+      (specificHeat * viscosity) / thermalConductivity
+    },
+    
+    # Eotvos number (Eo) or Bond number (Bo)
+    Eotvos = Eo_Bo,
+    Bond = Eo_Bo,
+    
+    # Fr
+    Froude = function(v, L) {
+      v / (L * g)
+    },
+    
+    Reynolds = function(density, v, L, viscosity) {
+      density * v * L / viscosity
+    }
+  )
+})()
 
 if (exists('Reynolds') == FALSE) { attach(DN) }
 
@@ -90,7 +112,9 @@ m.rrev <- function(mat) { mat[nrow(mat):1,] }
 # =============================================================================
 # Data Frame
 # =============================================================================
-df.orderBy <- function(df, colname) { df[order(df[,colname]),] }
+df.orderBy <- function(df, colname, decreasing=FALSE) {
+  df[order(df[,colname], decreasing=decreasing),]
+}
 
 # =============================================================================
 # Functions for debug log.
