@@ -38,6 +38,9 @@ UC <- list(
   K2C = function(K) { K - 273.15 },
   C2K = function(C) { C + 273.15 },
   F2C = function(F) { (F - 32) * 5 / 9 },
+  C2F = function(C) { (C * 9/5) + 32 },
+  F2R = function(F) { F + 459.67 },
+  R2F = function(R) { R - 459.67 },
   
   psi2Pa = function(psi) { psi * 6894.76 }
 )
@@ -61,25 +64,72 @@ DN <- (function(){
   
   list(
     
-    # We: [= "inertia" / "surface tension"]
-    Weber = function(density, v, L, surfaceTension) {
-      density * (v^2) * L / surfaceTension
+    # Bond number (Bo)
+    Bond = Eo_Bo,
+    
+    # Eotvos number (Eo)
+    Eotvos = Eo_Bo,
+    
+    # Mo
+    Morton = function(cDensity, cViscosity, surfaceTension, dDensity) {
+      if (missing(dDensity)) {
+        dDensity <- cDensity
+      }
+      (g * cViscosity^4 * dDensity) / (cDensity^2 * surfaceTension^3) 
     },
     
-    # specificHeat: J/Kg-K, viscosity: N-s/m2, thermal conductivity: W/m-K
+    
+
+    
+    
+    
+    # -------------------------------------------------------------------------
+    # Ratios between diffusions of momentum, heat or mass
+    # -------------------------------------------------------------------------
+    
+    # Pr := momentum / heat
+    #   specificHeat: J/Kg-K, viscosity: N-s/m2, thermal conductivity: W/m-K
     Prandtl = function(specificHeat, viscosity, thermalConductivity) {
       (specificHeat * viscosity) / thermalConductivity
     },
     
-    # Eotvos number (Eo) or Bond number (Bo)
-    Eotvos = Eo_Bo,
-    Bond = Eo_Bo,
+    # Sc := momentum / mass
+    Schmidt = function(viscosity, density, diffusionCoefficient) {
+      viscosity / (density * diffusionCoefficient)
+    },
+    
+    # Le := heat / mass
+    Lewis = function(thermalConductivity, density, specificHeat, diffusionCoefficient) {
+      k / (density * specificHeat * diffusionCoefficient)
+    },
+    
+    
+    # -------------------------------------------------------------------------
+    # Ratio of different forces
+    # -------------------------------------------------------------------------
     
     # Fr
     Froude = function(v, L) {
       v / (L * g)
     },
     
+    # Gr := "bouyancy" / "viscous force"
+    # 
+    # Heat Transfer:
+    #   beta = thermal expansion coefficient
+    #   dT_dC = temperature difference
+    # Mass Transfer:
+    #   
+    Grashof = function(L, beta, dT_dC, kinematicViscosity) {
+      (g * beta * dT_dC * L^3) / (kinematicViscosity^2)
+    },
+    
+    # We: [= "inertia" / "surface tension"]
+    Weber = function(density, v, L, surfaceTension) {
+      density * (v^2) * L / surfaceTension
+    },
+    
+    # Re: [= "inertia" / "viscous force"]
     Reynolds = function(density, v, L, viscosity) {
       density * v * L / viscosity
     }
