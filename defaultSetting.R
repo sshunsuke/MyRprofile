@@ -49,6 +49,24 @@ if (exists('inch2m') == FALSE) { attach(UC) }
 
 
 # =============================================================================
+# Properties of simple shapes.
+# =============================================================================
+circle <- list(
+  area = function(r) { r * r * pi },
+  circumference = function(r) { 2 * r * pi }
+)
+
+sphere <- list(
+  volume      = function(r) { (4 * pi * r^3) / 3 },
+  surfaceArea = function(r) { 4 * pi * r^2 }
+)
+
+elipsoid <- list(
+  volume      = function(a,b,c) { 4/3 * pi * a * b * c }
+)
+
+
+# =============================================================================
 # Dimensionless Number
 # =============================================================================
 if (exists('Reynolds') == TRUE) { detach(DN) }
@@ -268,17 +286,46 @@ CAT <- function(..., i=0) {
 
 
 
+# =============================================================================
+# Flow in a circular pipe.
+# =============================================================================
+
+FCP <- (function(){
+  
+  fD.colebrook_ <- function(roughness, D, Re, interval=c(0, 5), warn=TRUE) {
+    core_ <- function(roughness, D, Re, interval) {
+      if (Re <= 4000 && (warn == TRUE)) { warning("Re <= 4000 !") }
+      
+      fun <- function(f) {
+        (1 / sqrt(f)) + 2 * log10( roughness / D / 3.71 + 2.512 / Re / sqrt(f))
+      }
+      f <- uniroot(fun, interval)  # newton.method
+      f$root
+    }
+    
+    wrap_ <- function(roughness_, D_, Re_){
+      core_(roughness_, D_, Re_, interval)
+    }
+    mapply(wrap_, roughness, D, Re)
+  }
+  
+  list(
+    DarcyWeisbach = function(fD, density, velocity, D) {
+      fd * density * (velocity ^ 2) / (2 * D)
+    },
+    
+    WallShearStress = function(D, dp_dL) {
+      D * dp_dL
+    },
+    
+    fD.laminar = function(Re) { 64 / Re },
+    fD.Blasius = function(Re, C=0.3164) { C / (Re ^ 0.25) },
+    fD.Colebrook = fD.colebrook_
+  )
+  
+})()
 
 
-circle <- list(
-  area = function(r) { r * r * pi },
-  circumference = function(r) { 2 * r * pi }
-)
-
-sphere <- list(
-  volume      = function(r) { (4 * pi * r^3) / 3 },
-  surfaceArea = function(r) { 4 * pi * r^2 }
-)
 
 
 
