@@ -292,21 +292,31 @@ CAT <- function(..., i=0) {
 
 FCP <- (function(){
   
-  fD.colebrook_ <- function(roughness, D, Re, interval=c(0, 5), warn=TRUE) {
-    core_ <- function(roughness, D, Re, interval) {
+  fD.colebrook_ <- function(roughness, D, Re, tol=1e-8, warn=TRUE) {
+    core_ <- function(roughness, D, Re) {
       if (Re <= 4000 && (warn == TRUE)) { warning("Re <= 4000 !") }
       
-      fun <- function(f) {
-        (1 / sqrt(f)) + 2 * log10( roughness / D / 3.71 + 2.512 / Re / sqrt(f))
+      fun <- function(fD) {
+        (1 / sqrt(fD)) + 2 * log10( roughness / D / 3.71 + 2.51 / Re / sqrt(fD))
       }
-      f <- uniroot(fun, interval)  # newton.method
-      f$root
+      
+      # Derivative of fun().
+      dFun <- function(fD) {
+        - fD^(-3/2) * (1/2 + 2.51 / log(10) / (2.51 / Re / sqrt(fD) + roughness / 3.71 / D) / Re)
+      }
+      
+      fD_n <- FCP$fD.Blasius(Re)
+      d <- fun(fD_n) / dFun(fD_n)
+      
+      # Newton–Raphson method
+      while (abs(d) >= tol) {
+        d <- fun(fD_n) / dFun(fD_n)
+        fD_n <- fD_n - d
+      }
+      
+      fD_n
     }
-    
-    wrap_ <- function(roughness_, D_, Re_){
-      core_(roughness_, D_, Re_, interval)
-    }
-    mapply(wrap_, roughness, D, Re)
+    mapply(core_, roughness, D, Re)
   }
   
   list(
@@ -324,10 +334,5 @@ FCP <- (function(){
   )
   
 })()
-
-
-
-
-
 
 
