@@ -1,12 +1,12 @@
 # =============================================================================
 # Constant values
 # =============================================================================
-# Gravity Acceleration (m/s2)
-g <- 9.8
 
-# Gas Constant (J/K-mol)
-R <- 8.3144621
-# R <- 8.314471    # Moldover et al. (1988)
+g <- 9.8                      # Gravity Acceleration (m/s2)
+R <- 8.3144621                # Gas Constant (J/K-mol)
+# R <- 8.314471               # Moldover et al. (1988)
+# Na <- 6.022140857 * 10^23     # Avogadro constant
+kB <- 1.38064852 * 10^(-23)   # Boltzmann constant (J/K)
 
 # STP (Standard Temperature and Pressure) - old 
 Pstp <- 100000    # (Pa)
@@ -65,6 +65,9 @@ elipsoid <- list(
   volume      = function(a,b,c) { 4/3 * pi * a * b * c }
 )
 
+# Sauter Mean Diameter (vD: Vector of diameters)
+SMD <- function(vD) { sum(vD^3) / sum(vD^2) }
+
 
 # =============================================================================
 # Dimensionless Number
@@ -97,6 +100,11 @@ DN <- (function(){
     },
     
     
+    # Nu := "convective heat transfer" / "conductive heat transfer"
+    #   heatTransferCoefficient: W/m2-K, thermalConductivity: W/m-K
+    Nusselt = function(heatTransferCoefficient, thermalConductivity, L) {
+    	heatTransferCoefficient * L / thermalConductivity
+    },
 
     
     
@@ -308,7 +316,7 @@ FCP <- (function(){
       fD_n <- FCP$fD.Blasius(Re)
       d <- fun(fD_n) / dFun(fD_n)
       
-      # Newton–Raphson method
+      # Newton-Raphson method
       while (abs(d) >= tol) {
         d <- fun(fD_n) / dFun(fD_n)
         fD_n <- fD_n - d
@@ -334,5 +342,31 @@ FCP <- (function(){
   )
   
 })()
+
+
+IdealGas <- (function() {
+
+  Smix   <- function(n, x_i) { - n * R * sum(x_i * log(x_i)) }
+
+  list(
+    # EOS: PV = nRT
+    P = function(V, n, T) { n * R * T / V },    # Pa
+    V = function(P, n, T) { n * R * T / P },    # m3
+    n = function(P, V, T) { P * V / R / T },    # mol
+    T = function(P, V, n) { P * V / n / R },    # K
+    
+    # Raoult's law
+    Raoult.Pi = function(x_i, Psat_i) { x_i * Psat_i },
+    Raoult.BP = function(x_i, Psat_i) { sum( x_i * Psat_i ) },     # Bubble Point
+    Raoult.DP = function(x_i, Psat_i) { 1 / sum(x_i * Psat_i) },   # Dew Point
+    
+    # Mixing Entropy and Mixing Gibbs Energy
+    Smix = Smix,
+    Gmix = function(n, x_i, T) { - n * T * Smix(n, x_i) }
+
+  )
+  
+})()
+
 
 
