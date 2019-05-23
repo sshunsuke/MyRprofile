@@ -333,9 +333,10 @@ FCP <- (function(){
     },
     
     WallShearStress = function(D, dp_dL) {
-      D * dp_dL
+      D / 4 * dp_dL
     },
     
+    # Darcy friction factor
     fD.laminar = function(Re) { 64 / Re },
     fD.Blasius = function(Re, C=0.3164) { C / (Re ^ 0.25) },
     fD.Colebrook = fD.colebrook_
