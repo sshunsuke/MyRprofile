@@ -180,6 +180,20 @@ wcbmat <- function(data, header, sep="\t", row.names=FALSE, qmethod="double",
 }
 
 # =============================================================================
+# Vector
+# =============================================================================
+v.indexClosestValue <- function(vec, x) {
+	diff <- abs(vec-x)
+	which( diff == min(diff) )
+}
+
+v.closestValue <- function(vec, x) {
+	vec[ v.indexClosestValue(vec, x) ]
+}
+
+
+
+# =============================================================================
 # Matrix
 # =============================================================================
 m.crev <- function(mat) { mat[,ncol(mat):1] }
