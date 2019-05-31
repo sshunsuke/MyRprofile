@@ -350,10 +350,32 @@ FCP <- (function(){
       D / 4 * dp_dL
     },
     
+    frictionalVelocity = function(WallShearStress, density){
+      sqrt(WallShearStress / density)
+    },
+    
+    # Law of the wall
+    #   y+ < 5:         Viscous sublayer
+    #   5 < y+ < 30~70: Buffer layer
+    yPlus = function(frictionalVelocity, y, kinematicViscosity) {
+      frictionalVelocity * y / kinematicViscosity    # y: distance from the wall 
+    },
+    
+    #uPlus <- function(velocity, frictionalVelocity) {
+    #  velocity / frictionalVelocity
+    #},
+    
     # Darcy friction factor
     fD.laminar = function(Re) { 64 / Re },
     fD.Blasius = function(Re, C=0.3164) { C / (Re ^ 0.25) },
-    fD.Colebrook = fD.colebrook_
+    fD.Colebrook = fD.colebrook_,
+    
+    # Fanning friction factor
+    ff.laminar = function(Re) { 16 / Re },
+    ff.Blasius = function(Re, C=0.0791) { C / (Re ^ 0.25) },
+    ff.Colebrook = function(roughness, D, Re, tol=1e-8, warn=TRUE){
+      fD.colebrook_(roughness, D, Re, tol=tol, warn=warn) / 4
+    }
   )
   
 })()

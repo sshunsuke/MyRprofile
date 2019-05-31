@@ -7,27 +7,11 @@ hydraulicDiameter <- function(A, S) {
   4 * A / S
 }
 
-cpf.DarcyWeisbach <- function(fD, density, velocity, D) {
-  fd * density * (velocity ^ 2) / (2 * D)
-}
-
-cpf.WallShearStress <- function(D, dp_dL) {
-  D * dp_dL
-}
 
 
 # =============================================================================
 # Friction Factor.
 # =============================================================================
-
-# Darcy Friction Factor
-cpf.fd <- list(
-  Colebrook = function(roughness, D, Re, interval=c(0, 5)) {
-    cpf.ff$Colebrook(roughness, D, Re, interval=interval)
-  },
-  Blasius = function(Re, C=0.3164) { C / (Re ^ 0.25) },
-  laminar = function(Re) { 64 / Re }
-)
 
 # Fanning Friction Factor
 cpf.ff <- (function(){
@@ -52,9 +36,7 @@ cpf.ff <- (function(){
   list(
     WARNING = TRUE,
     
-    Colebrook = colebrook_,
-    Blasius = function(Re, C=0.0791) { C / (Re ^ 0.25) },
-    laminar = function(Re) { 16 / Re }
+    Colebrook = colebrook_
   )
 })()
 
