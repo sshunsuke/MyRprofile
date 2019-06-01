@@ -203,6 +203,7 @@ m.rrev <- function(mat) { mat[nrow(mat):1,] }
 # Data Frame
 # =============================================================================
 df.orderBy <- function(df, colname, decreasing=FALSE) {
+  if (missing(colname)) { stop("'colname' is not specified.") }
   df[order(df[,colname], decreasing=decreasing),]
 }
 

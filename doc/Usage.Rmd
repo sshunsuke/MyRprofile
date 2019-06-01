@@ -1,0 +1,90 @@
+---
+title: "Usage of the Functions"
+author: "Shunsuke"
+date: '`r format(Sys.time(), "%y/%m/%d %H:%M")`'
+output:
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+source("../defaultSetting.R")
+vec <- 1:10 * 10
+mat <- rbind( 11:13, 21:23, 31:33 )
+df <- data.frame(A = 1:5, B=c(3, -3, 0, 3, 1), C=c(99,88,77,66,55))
+```
+
+---
+
+# defaultSetting.R
+
+## Data
+
+* v.indexClosestValue()
+* v.closestValue()
+* m.rrev()
+* m.rrev()
+* df.orderBy()
+
+
+### Vector
+
+```{r collapse=TRUE}
+vec
+v.indexClosestValue(vec, 31)
+v.closestValue(vec, 75)
+```
+
+
+### Matrix
+
+```{r collapse=TRUE}
+mat
+m.rrev( mat )
+m.crev( mat )
+```
+
+### Data Frame
+
+```{r df}
+df
+df.orderBy(df, "B")
+```
+
+
+## Log
+
+```
+DEBUG_LOG$FILE <- "log.txt"              # speficy name of the log file.
+DEBUG_LOG$LEVEL <- DEBUG_LOG$LEVEL_INFO  # speficy the log level.
+
+f <- 3.45; s <- "abc"
+INFO("a = %f, s = %s", a, s)             # output a log message.
+DEBUG("log message")                     # this message is not outputed.
+
+DEBUG_LOG$LEVEL <- DEBUG_LOG$LEVEL_DEBUG
+DEBUG("log message")                     # this message is outputed.
+```
+
+
+
+---
+
+
+$$u = \begin{pmatrix} 10 & 20 & 30 & 40 & 50 & 60 & 70 & 80 & 90 & 100 \end{pmatrix}$$
+
+$$\begin{array}{ccc}
+x_{11} & x_{12} & x_{13}\\
+x_{21} & x_{22} & x_{23}
+\end{array}$$
+
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
