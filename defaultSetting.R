@@ -207,6 +207,21 @@ df.orderBy <- function(df, colname, decreasing=FALSE) {
   df[order(df[,colname], decreasing=decreasing),]
 }
 
+
+# =============================================================================
+# Probability
+# =============================================================================
+# Create a matrix of information of cumulative distribution.
+# 
+# If you want to create a graph of cumulative distribution, you should use
+# ecdf() function.
+#   > fCP <- ecdf( c(3,76,58,24,100,1) ); plot(fCP)
+cum.probability <- function(values, decreasing=FALSE) {
+  len <- length(values)
+  cbind(X = sort(values, decreasing=decreasing), cum.prob = (1:len)/len)
+}
+
+
 # =============================================================================
 # Functions for debug log.
 # =============================================================================
