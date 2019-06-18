@@ -3,21 +3,20 @@ title: "Usage of defaultSetting.R"
 author: "Shunsuke"
 date: '`r format(Sys.time(), "%y/%m/%d %H:%M")`'
 output:
-  html_document:
-    toc: true
-    toc_float: 
-      collapsed: false
-      smooth_scroll: false
-    number_section: true
-    code_folding: hide
-    theme: spacelab
-    highlight: zenburn
   pdf_document:
-    number_section: true
     highlight: tango
     latex_engine: lualatex
-header-includes:
-  - \setmainfont{Arial}
+    number_section: yes
+  html_document:
+    code_folding: hide
+    highlight: zenburn
+    number_section: yes
+    theme: spacelab
+    toc: yes
+    toc_float:
+      collapsed: no
+      smooth_scroll: no
+header-includes: \setmainfont{Arial}
 ---
 
 
