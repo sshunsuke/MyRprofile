@@ -1,0 +1,82 @@
+---
+title: "Tips - Data"
+author: "Shunsuke"
+date: "2019年6月9日"
+output: 
+  html_document:
+    toc: true
+    toc_float: 
+      collapsed: false
+      smooth_scroll: false
+    number_section: true
+    theme: spacelab
+    highlight: zenburn
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, collapse=TRUE, prompt=TRUE)
+```
+
+# Vector
+
+## What is vector in R?
+
+> Vector is a basic data structure in R. It contains element of the same type. The data types can be logical, integer, double, character, complex or raw.
+>
+> A vector’s type can be checked with the typeof() function.
+>
+> Another important property of a vector is its length. This is the number of elements in the vector and can be checked with the function length().
+
+https://www.datamentor.io/r-programming/vector/
+
+Other important points are listed below. 
+
+* Vector containing only one element can be defined. 
+* Vector can include not only numbers but also booleans and strings.
+* However, if vector include strings, arithmetic operations cannot be applied to it. 
+* If arithmetic operations are applied to vector, TRUE and FALSE are automatically converted to 1 and 0 respectively. 
+
+```{r, collapse=TRUE}
+is.vector(1:3)
+is.vector( c(TRUE, FALSE) )
+is.vector("str")
+```
+
+```{r, collapse=TRUE}
+c(TRUE, FALSE) * 10
+```
+
+
+## Create vector
+
+### Functions & syntax sugar
+
+* c()
+* seq()
+* rep()
+* 1:10
+
+### Examples
+
+; the simplest way to create vecor
+
+```{r, collapse=TRUE}
+c(-4 , TRUE, "a", FALSE, 5, "bbbb")
+```
+
+; create vector consisting of numbers. 
+
+```{r}
+1:10*3 + 1
+seq(1, 20, by=5)         # 等差数列   1 6 11 16
+seq(1,5, length.out=9)   # devide the range from 1 to 5 by N-1 (N=9 in this case). 
+rep(1:3, times=3)        # repeat c(1,2,3) three times
+rep(1:3, each=3)         # repeat each element of c(1,2,3)
+```
+
+
+
+
+
+
+
