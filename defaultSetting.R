@@ -126,7 +126,7 @@ DN <- (function(){
     
     # Le := heat / mass
     Lewis = function(thermalConductivity, density, specificHeat, diffusionCoefficient) {
-      k / (density * specificHeat * diffusionCoefficient)
+    	thermalConductivity / (density * specificHeat * diffusionCoefficient)
     },
     
     
