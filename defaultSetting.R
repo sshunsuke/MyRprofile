@@ -358,6 +358,8 @@ FCP <- (function(){
   }
   
   list(
+    
+    # Darcy-Weisbach equation (for the calculation of dP per unit length)
     DarcyWeisbach = function(fD, density, velocity, D) {
       fd * density * (velocity ^ 2) / (2 * D)
     },
@@ -391,7 +393,38 @@ FCP <- (function(){
     ff.Blasius = function(Re, C=0.0791) { C / (Re ^ 0.25) },
     ff.Colebrook = function(roughness, D, Re, tol=1e-8, warn=TRUE){
       fD.colebrook_(roughness, D, Re, tol=tol, warn=warn) / 4
+    },
+    
+    
+    # Borda-Carnot's formula
+    #   dE = lossCoefficient * density * (vout - vin)^2 / 2
+    #     v: flow velocity
+    #     density: 
+    #     Din: diameter before expansion
+    #     Dout: diameter after expansion
+    #     eta: pressure recovery factor (optional parameter)
+    BordaCarnot = function(vin, density, Din, Dout, eta){
+      if (missing(eta)) { eta <- 0 }
+      lossCoefficient = (1 - eta) * (1 - (Din / Dout)^2)^2
+      lossCoefficient * density * vin^2 / 2
+    }, 
+    
+    # BordaCarnotHead
+    
+    
+    
+    # Drift Flux Model.
+    driftFluxModel = function(C0, Vd, vsg, vsl) {
+      vmix <- vsg + vsl
+      vg <- C0 * vmix + Vd
+      voidRatio <- vsg / vg
+      
+      Hl <- 1 - voidRatio
+      vl <- vsg / Hl
+      
+      c(vg=vg, vl=vl, Hl=Hl)
     }
+    
   )
   
 })()

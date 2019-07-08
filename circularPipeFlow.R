@@ -43,16 +43,24 @@ cpf.ff <- (function(){
 
 # =============================================================================
 # Drift Flux Model.
+#
+#   1. vmix = vsg + vsl
+#   2. vg = C0 * vmix + vd
+#   3. voidRatio = vsg / vg
+#
 # =============================================================================
 
-cpf.dfm <- function(C0, Vgj, vsg, vsl) {
+cpf.driftFluxModel <- function(C0, Vd, vsg, vsl) {
   vmix <- vsg + vsl
-  vg <- vmix + Vgj
-  Hl <- 1 - (vsg / vg)
+  vg <- C0 * vmix + Vd
+  voidRatio <- vsg / vg
+  
+  Hl <- 1 - voidRatio
   vl <- vsg / Hl
   
-  c(Hl = Hl, vg=vg, vl=vl)
+  c(vg=vg, vl=vl, Hl=Hl)
 }
+
 
 cpf.dfm.C0 <- list(
   bubble = function(densityG, densityL) {
