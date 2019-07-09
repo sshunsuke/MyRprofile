@@ -41,6 +41,24 @@ cpf.ff <- (function(){
 })()
 
 
+
+# Borda-Carnot's formula
+#   dE = lossCoefficient * density * (vout - vin)^2 / 2
+#     v: flow velocity
+#     density: 
+#     Din: diameter before expansion
+#     Dout: diameter after expansion
+#     eta: pressure recovery factor (optional parameter)
+BordaCarnot = function(vin, density, Din, Dout, eta){
+	if (missing(eta)) { eta <- 0 }
+	lossCoefficient = (1 - eta) * (1 - (Din / Dout)^2)^2
+	lossCoefficient * density * vin^2 / 2
+}
+
+# BordaCarnotHead
+
+
+
 # =============================================================================
 # Drift Flux Model.
 #

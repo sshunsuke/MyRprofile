@@ -357,6 +357,15 @@ FCP <- (function(){
     mapply(core_, roughness, D, Re)
   }
   
+  # Borda-Carnot's formula
+  #   vin : flow velocity before expansion
+  #   Ain: cross sectional area before expansion
+  #   Aout: cross sectional area after expansion
+  BordaCarnotHead_ <- function(vin, Ain, Aout){
+  	(1 - (Ain / Aout))^2 * (vin^2) / (2 * g)
+  }
+  
+  
   list(
     
     # Darcy-Weisbach equation (for the calculation of dP per unit length)
@@ -396,21 +405,23 @@ FCP <- (function(){
     },
     
     
-    # Borda-Carnot's formula
+    # Borda-Carnot's formula (Energy loss)
     #   dE = lossCoefficient * density * (vout - vin)^2 / 2
-    #     v: flow velocity
-    #     density: 
-    #     Din: diameter before expansion
-    #     Dout: diameter after expansion
-    #     eta: pressure recovery factor (optional parameter)
-    BordaCarnot = function(vin, density, Din, Dout, eta){
-      if (missing(eta)) { eta <- 0 }
-      lossCoefficient = (1 - eta) * (1 - (Din / Dout)^2)^2
-      lossCoefficient * density * vin^2 / 2
+    #     vin: Flow velocity before expansion
+    #     Ain: Cross sectional area before expansion
+    #     Aout: Cross sectional area after expansion
+    #     density: Fluid density
+    BordaCarnot = function(vin, Ain, Aout, density){
+      (1 - (Ain / Aout))^2 * density * vin^2 / 2
     }, 
     
-    # BordaCarnotHead
-    
+    # Borda-Carnot (Head loss)
+    #   vin : Flow velocity before expansion
+    #   Ain: cross sectional area before expansion
+    #   Aout: cross sectional area after expansion
+    BordaCarnotHead = function(vin, Ain, Aout){
+    	(1 - (Ain / Aout))^2 * (vin^2) / (2 * g)
+    },
     
     
     # Drift Flux Model.
