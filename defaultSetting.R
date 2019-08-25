@@ -1,3 +1,22 @@
+# Nomenclatures for properties:
+#
+# fD: Darcy friction factor
+# r: radius 
+# v: velocity [m/sec]
+# x: molar fraction
+#
+# A: area
+# D: diameter
+# L: length [m]
+# P: pressure
+# R: Gas Constant [J/K-mol]
+# T: temperature
+# V: volume
+# 
+# 
+
+
+
 # =============================================================================
 # Constant values
 # =============================================================================
