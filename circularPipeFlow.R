@@ -1,5 +1,9 @@
 
 
+xyTableFromFunction <- function(fun, x, ...) {
+	y <- fun(x, ...)
+	cbind(x,y)
+}
 
 
 
@@ -105,7 +109,7 @@ HeatExchange <- list(
   Tprofile = list(
     funConstantAmbientT = function(Tin, Tamb, htc, D, mdot, cp) {
       f <- function(x) {
-        exp(- 4 * htc * x / mdot / cp / D) * (Tin - Tamb) + Tamb
+        exp(- htc * (pi * D) / (mdot * cp) * x) * (Tin - Tamb) + Tamb
       }
       return(f)
     }
@@ -189,4 +193,10 @@ HeatExchange <- list(
 # (Tamb - Tin) / (Tamb - Tout) = exp( htc * (pi * D * dL) / dotm / cp )
 # Tamb - Tout =  (Tamb - Tin)  /  (exp( htc * (pi * D * dL) / dotm / cp ))
 
+
+f <- HeatExchange$Tprofile$funConstantAmbientT(20, 4, 450, UC$inch2m(14), 18, 2000)
+plot(f, to=1000)
+
+
+xyTableFromFunction(f, 1:100*10)
 
