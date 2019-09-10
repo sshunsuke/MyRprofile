@@ -460,6 +460,88 @@ FCP <- (function(){
 })()
 
 
+# =============================================================================
+# Heat Exchanger
+# =============================================================================
+
+# LMTD (logarithmic mean temperature difference)
+#   - Positive values mean heat flow from line-1 to line-2 (T1 > T2). 
+#   - Nagative values mean heat flow from line-2 to line-1 (T2 < T1).
+LMTD = (function() {
+  
+  assert = function(expr, msg, T1_in, T1_out, T2_in, T2_out) {
+    if (expr == FALSE) {
+      errorMsg = sprintf("%s T1_out=%.2f, T2_out=%.2f, T1_in=%.2f, T2_in=%.2f", msg, T1_in, T1_out, T2_in, T2_out)
+      stop(errorMsg)
+    }
+  }
+
+  list(
+
+  # Meaning of the symbols:
+  #   dT   in         out
+  #
+  #   T1   in ------> out
+  #   T2  out <------ in
+  counterCurrent = function(T1_in, T1_out, T2_in, T2_out) {
+    # Error check of inputs
+    if (T1_in > T2_out) {
+      assert(T1_out > T2_in, "Temperature of line-1 must be higher at both ends (T1 > T2).", T1_in, T1_out, T2_in, T2_out)
+      assert(T1_in > T1_out, "Fluid of line-1 must be cooled down (T1_in > T1_out) because of 'T1_in > T2_out'.", T1_in, T1_out, T2_in, T2_out)
+      assert(T2_in < T2_out, "Fluid of line-2 must be warmed up (T2_in < T2_out) because of 'T1_in > T2_out'.", T1_in, T1_out, T2_in, T2_out)
+    } else if (T1_in < T2_out) {
+      assert(T1_out < T2_in, "Temperature of line-1 must be lower at both ends (T1 < T2).", T1_in, T1_out, T2_in, T2_out)
+      assert(T1_in < T1_out, "Fluid of line-1 must be warmed up (T1_in < T1_out) because of 'T1_in < T2_out'.", T1_in, T1_out, T2_in, T2_out)
+      assert(T2_in > T2_out, "Fluid of line-2 must be cooled down (T2_in > T2_out) because of 'T1_in < T2_out'.", T1_in, T1_out, T2_in, T2_out)
+    } else {
+      # some check may be required.
+    }
+    
+    dT_in  <- T1_in - T2_out
+    dT_out <- T1_out - T2_in
+    (dT_in - dT_out) / log(dT_in / dT_out)
+  },
+  
+  # Meaning of the symbols:
+  #   dT   in         out
+  #
+  #   T1   in ------> out
+  #   T2   in ------> out
+  coCurrent = function(T1_in, T1_out, T2_in, T2_out) {
+    # Error check of inputs
+    if (T1_in > T2_in) {
+      assert(T1_out > T2_out, "Temperature of line-1 must be higher at both ends (T1 > T2).", T1_in, T1_out, T2_in, T2_out)
+      assert(T1_in > T1_out, "Fluid of line-1 must be cooled down (T1_in > T1_out) because of 'T1_in > T2_in'.", T1_in, T1_out, T2_in, T2_out)
+      assert(T2_in < T2_out, "Fluid of line-2 must be warmed up (T2_in < T2_out) because of 'T1_in > T2_in'.", T1_in, T1_out, T2_in, T2_out)
+    } else if (T1_in < T2_in) {
+      assert(T1_out < T2_out, "Temperature of line-1 must be lower at both ends (T1 < T2).", T1_in, T1_out, T2_in, T2_out)
+      assert(T1_in < T1_out, "Fluid of line-1 must be warmed up (T1_in < T1_out) because of 'T1_in < T2_out'.", T1_in, T1_out, T2_in, T2_out)
+      assert(T2_in > T2_out, "Fluid of line-2 must be cooled down (T2_in > T2_out) because of 'T1_in < T2_out'.", T1_in, T1_out, T2_in, T2_out)
+    } else {
+      assert(T1_out == T2_out, "Temperature of both fluids must be same at outlet (T1_out == T2_out).", T1_in, T1_out, T2_in, T2_out)
+    }
+    
+    dT_in  <- T1_in - T2_in
+    dT_out  <- T1_out - T2_out
+    (dT_in - dT_out) / log(dT_in / dT_out)
+  },
+  
+  # LMTD for a pipe flow with constant ambient T
+  #         Tamb
+  # T   in ------> out
+  constantAmbientT = function(Tin, Tout, Tamb) {
+    HeatExchange$LMTD$coCurrent(Tin, Tout, Tamb, Tamb)
+  }
+  
+  )
+
+})()
+
+
+
+
+
+
 IdealGas <- (function() {
 
   Smix   <- function(n, x_i) { - n * R * sum(x_i * log(x_i)) }
