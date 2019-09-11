@@ -41,6 +41,31 @@ Tntp <- 293.15    # (K)
 
 
 # =============================================================================
+# Greatest Common Divisor & Least Common Multiple
+# =============================================================================
+gcd <- (function(){
+  gcd_ <- function(a, b){
+    while(a %% b != 0){
+      tmp <- b
+      b <- a %% b
+      a <- tmp
+    }
+    return(b)
+  }
+  function(vec){ Reduce(gcd_, vec) }
+})()
+
+lcm <- (function(vec){
+  lcm_ <- function(a, b){
+    a * b / gcd(c(a,b))
+  }
+  function(vec){ Reduce(lcm_, vec) }
+})()
+
+
+
+
+# =============================================================================
 # Unit Conversion
 # =============================================================================
 if (exists('inch2m') == TRUE) { detach(UC) }
