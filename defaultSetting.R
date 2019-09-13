@@ -52,16 +52,15 @@ gcd <- (function(){
     }
     return(b)
   }
-  function(vec){ Reduce(gcd_, vec) }
+  function(...){ Reduce(gcd_, c(...)) }
 })()
 
 lcm <- (function(vec){
   lcm_ <- function(a, b){
     a * b / gcd(c(a,b))
   }
-  function(vec){ Reduce(lcm_, vec) }
+  function(...){ Reduce(lcm_, c(...)) }
 })()
-
 
 
 
