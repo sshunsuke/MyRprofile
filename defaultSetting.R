@@ -57,7 +57,7 @@ gcd <- (function(){
 
 lcm <- (function(vec){
   lcm_ <- function(a, b){
-    a * b / gcd(c(a,b))
+    a * b / gcd(a,b)
   }
   function(...){ Reduce(lcm_, c(...)) }
 })()
@@ -85,7 +85,17 @@ UC <- list(
   F2R = function(F) { F + 459.67 },
   R2F = function(R) { R - 459.67 },
   
-  psi2Pa = function(psi) { psi * 6894.76 }
+  psi2Pa = function(psi) { psi * 6894.76 },
+  
+  lbm2kg = function(lbm) { lbm * 0.453592 },
+  
+  # Viscoisty
+  cP2Pas = function(cP) {cP / 1000},
+  Pas2cP = function(Pas) {Pas * 1000},
+  
+  # Surface Tension
+  Npm2dynpcm = function(Npm) {Npm * 1000},
+  dynpcm2Npm = function(dynpcm) {dynpcm / 1000}
 )
 
 if (exists('inch2m') == FALSE) { attach(UC) }
@@ -399,15 +409,6 @@ FCP <- (function(){
     }
     mapply(core_, roughness, D, Re)
   }
-  
-  # Borda-Carnot's formula
-  #   vin : flow velocity before expansion
-  #   Ain: cross sectional area before expansion
-  #   Aout: cross sectional area after expansion
-  BordaCarnotHead_ <- function(vin, Ain, Aout){
-  	(1 - (Ain / Aout))^2 * (vin^2) / (2 * g)
-  }
-  
   
   list(
     
