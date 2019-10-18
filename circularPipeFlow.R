@@ -1,5 +1,8 @@
 # =============================================================================
 # Mukherjee & Brill.
+
+# densityMixS: mixture density with a consideration of slip
+
 # =============================================================================
 
 
@@ -10,11 +13,19 @@ MukherjeeBrill$coefficients <- cbind(
 	c(-1.330282, 4.808139,  4.171584, 56.262268, 0.079951, 0.504887),
 	c(-0.516644, 0.789805,  0.551627, 15.519214, 0.371771, 0.393952)
 )
-colnames(MukherjeeBrill$coefficients) <- c("Up", "DownStratified", "Down")
+colnames(MukherjeeBrill$coefficients) <- c("Up", "DownStratified", "DownOther")
 rownames(MukherjeeBrill$coefficients) <- paste("C", 1:6, sep="")
 
-# calculate the dimensionless groups proposed by Duns & Ros
-MukherjeeBrill$calculateDLNs = function(vsG, vsL, D, densityL, surfaceTension, viscosityL, angle) {
+
+
+# -----------------------------------------------------------------------------
+# Calculate the dimensionless groups proposed by Duns & Ros. 
+#
+# Note:
+#   densityG and viscosityG are not used in this function, but these are 
+#   required to calculate dPdL. 
+# -----------------------------------------------------------------------------
+MukherjeeBrill$calculateDLNs = function(vsG, vsL, D, densityG, densityL, viscosityG, viscosityL, surfaceTension, angle) {
 	NLv <- vsL * (densityL / g / surfaceTension)^(0.25)
 	NGv <- vsG * (densityL / g / surfaceTension)^(0.25)
 	Nd <- D * sqrt(densityL * g / surfaceTension)
@@ -24,15 +35,15 @@ MukherjeeBrill$calculateDLNs = function(vsG, vsL, D, densityL, surfaceTension, v
 	NGvSM <- 10 ^ (1.401 - 2.694 * NL + 0.521 * NLv ^ 0.329)
 	
 	# Upflow: Bubble/Slug transition (4.128)
-	x <- log(NGv) + 0.940 + 0.074 * sin(angle) - 0.855 * sin(angle)^2 + 3.695 * NL
+	x <- log10(NGv) + 0.940 + (0.074 * sin(angle)) - (0.855 * sin(angle)^2) + (3.695 * NL)
 	NLvBS_up <- 10^x 
 	
 	# Downflow: Bubble/Slug transition (4.131)
-	y <- 0.431 - (3.003 * NL) - (1.138 * log(NLv) * sin(angle)) - (0.429 * log(NLv)^2 * sin(angle)) + (1.132 * sin(angle))
+	y <- 0.431 - (3.003 * NL) - (1.138 * log10(NLv) * sin(angle)) - (0.429 * log10(NLv)^2 * sin(angle)) + (1.132 * sin(angle))
 	NGvBS <- 10^y
 	
 	# Downflow: Stratified (4.133)
-	z <- 0.321 - ((0.017 * NGv) - 4.267 * sin(angle)) - (2.972 * NL) - (0.033 * log(NGv)^2) - (3.925 * sin(angle)^2)
+	z <- 0.321 - ((0.017 * NGv) - 4.267 * sin(angle)) - (2.972 * NL) - (0.033 * log10(NGv)^2) - (3.925 * sin(angle)^2)
 	NLvST <- 10^z
 	
 	list(
@@ -46,6 +57,15 @@ MukherjeeBrill$calculateDLNs = function(vsG, vsL, D, densityL, surfaceTension, v
 		NGvBS = NGvBS,  # Downflow: Bubble/Slug transition (4.131)
 		NLvST = NLvST,  # Downflow: Stratified (4.133)
 		
+		# Input values (these are used in the calculations of holdup and dPdL).
+		vsG = vsG,
+		vsL = vsL,
+		D = D,
+		densityG = densityG,
+		densityL = densityL,
+		viscosityG = viscosityG,
+		viscosityL = viscosityL,
+		surfaceTension = surfaceTension, 
 		angle = angle   # [rad]
 	)
 }
@@ -99,6 +119,65 @@ MukherjeeBrill$checkFlowRegime <- function(DLNs) {
 }
 
 
+MukherjeeBrill$selectCoefficients <- function(DLNs, flowRegime) {
+	if (DLNs$angle <= 0) {
+		if (flowRegime == 1) {
+			return(MukherjeeBrill$coefficients[,"DownStratified"])
+		} else {
+			return(MukherjeeBrill$coefficients[,"DownOther"])
+		}
+	}
+	MukherjeeBrill$coefficients[,"Up"]
+}
+	
+
+MukherjeeBrill$holdup <- function(DLNs, flowRegime) {
+	co <- MukherjeeBrill$selectCoefficients(DLNs, flowRegime)
+	
+	t1 <- co[1] + (co[2] * sin(DLNs$angle)) + (co[3] * sin(DLNs$angle)^2) + (co[4] * DLNs$NL^2)
+	t2 <- DLNs$NGv^co[5] / DLNs$NLv^co[6]
+	exp(t1 * t2)
+}
+
+MukherjeeBrill$dPdL <- function(DLNs, flowRegime) {
+	HL <- MukherjeeBrill$holdup(DLNs, flowRegime)
+	
+	vmix <- DLNs$vsG + DLNs$vsL
+	HLnoslip <- DLNs$vsL / vmix
+	
+	densityMixS <- densityG * (1 - HL) + densityL * HL                    # (3.22)
+	densityMixN <- densityG * (1 - HLnoslip) + densityL * HLnoslip        # (3.23)
+	viscosityMixS <- viscosityG * (1 - HL) + viscosityL * HL              # (3.19)
+	viscosityMixN <- viscosityG * (1 - HLnoslip) + viscosityL * HLnoslip  # (3.21)
+	
+
+	
+	if (flowRegime == 3 | flowRegime == 4) {
+		# Slug or Bubble
+		Re <- densityMixN * vmix * DLNs$D / viscosityMixN
+		fD <- FCP$fD.Blasius(Re)
+		Ek <- densityMixS * vmix * vsG / p  # (4.137)
+		dPdL <- (fD * densityMixS * vmix^2 / (2 * D) + densityMixS * g * sin(angle)) / (1 - Ek)  # (4.136)
+	} else if (flowRegime == 2) {
+		# Annular
+		HR <- HLnoslip / HL
+		
+		Ek <- densityMixS * vmix * vsG / p  # (4.137)
+		
+		
+		
+	} else if (flowRegime == 1) {
+		
+	} else {
+		# error
+	}
+		
+	
+	
+}
+
+
+
 isAnnularMist = function(DLNs) { DLNs$NGv > DLNs$NGvSM }
 
 MukherjeeBrill$coefficients
@@ -108,8 +187,26 @@ MukherjeeBrill$coefficients
 #
 # angle (rad)
 
-a <- MukherjeeBrill$calculateDLNs(10,1,inch2m(3), 1000, 0.07, 0.001026800601060196, 0)
-MukherjeeBrill$checkFlowRegime(a)
+
+# Example 3.2
+#   d = 6", vsG = 3.86 ft/sec, vsL = 3.97 ft/sec
+# Example 4.1
+#   densityG = 5.88 lbm/ft3, densityL = 47.61 lbm/ft3, 
+# Example 4.8
+#   viscosityG = 0.016 cp, viscosityL = 0.97 cp, surfaceTension = 8.41 dynes/cm, angle = 90 deg
+ratio <- lbm2kg(1) / (ft2m(1)^3)
+exam <- MukherjeeBrill$calculateDLNs(ft2m(3.86), ft2m(3.97), inch2m(6), 5.88*ratio, 47.61*ratio, UC$cP2Pas(0.016), UC$cP2Pas(0.97), UC$dynpcm2Npm(8.41), pi/2)
+fr <- MukherjeeBrill$checkFlowRegime(exam)
+MukherjeeBrill$holdup(exam, fr)
+
+
+
+
+
+
+
+
+
 
 
 
@@ -119,6 +216,11 @@ MukherjeeBrill$checkFlowRegime(a)
 
 
 if (FALSE) {
+	exam <- MukherjeeBrill$calculateDLNs(3.86, 3.97, 0.5, 5.88, 47.61, 0.016, 0.97, 8.41, pi/2)
+	
+	a <- MukherjeeBrill$calculateDLNs(10,1,inch2m(3), 1000, 0.07, 0.001026800601060196, 0)
+	MukherjeeBrill$checkFlowRegime(a)
+	
 	# Dimensionless Groups proposed by Duns & Ros
 	
 	# Liquid velocity number
@@ -137,7 +239,7 @@ if (FALSE) {
 	
 	
 	
-	x = log(NGv) + 0.940 + 0.074 * sin(angle) - 0.855 * sin(angle)^2 + 3.695 * NL
+	x = log10(NGv) + 0.940 + 0.074 * sin(angle) - 0.855 * sin(angle)^2 + 3.695 * NL
 	
 	NL
 	
