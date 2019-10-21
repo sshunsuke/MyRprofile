@@ -1,6 +1,7 @@
 # Nomenclatures for properties:
 #
 # fD: Darcy friction factor
+# g: gravity Acceleration [m/s2]
 # r: radius 
 # v: velocity [m/sec]
 # x: molar fraction
@@ -10,7 +11,7 @@
 # L: length [m]
 # P: pressure
 # R: Gas Constant [J/K-mol]
-# T: temperature
+# T: temperature [K]
 # V: volume
 # 
 # 
@@ -55,7 +56,7 @@ gcd <- (function(){
   function(...){ Reduce(gcd_, c(...)) }
 })()
 
-lcm <- (function(vec){
+lcm <- (function(){
   lcm_ <- function(a, b){
     a * b / gcd(a,b)
   }
@@ -70,14 +71,17 @@ lcm <- (function(vec){
 if (exists('inch2m') == TRUE) { detach(UC) }
 
 UC <- list(
-  rad2deg = function(rad) { rad * 180 / pi},
-  deg2rad = function(deg) { deg * pi / 180},
+  # Angle
+  rad2deg = function(rad) { rad * 180 / pi },
+  deg2rad = function(deg) { deg * pi / 180 },
   
+  # Length
   inch2m = function(inch) { inch * 0.0254 },
   m2inch = function(m) { m / 0.0254 },
   ft2m   = function(ft) { ft * 0.3048 },
   m2ft   = function(m) { m / 0.3048 },
   
+  # Temperature
   K2C = function(K) { K - 273.15 },
   C2K = function(C) { C + 273.15 },
   F2C = function(F) { (F - 32) * 5 / 9 },
@@ -85,9 +89,16 @@ UC <- list(
   F2R = function(F) { F + 459.67 },
   R2F = function(R) { R - 459.67 },
   
+  # Pressure
   psi2Pa = function(psi) { psi * 6894.76 },
+  Pa2psi = function(Pa)  { Pa / 6894.76 },
   
+  # Weight
   lbm2kg = function(lbm) { lbm * 0.453592 },
+  
+  # 
+  radps2Hz = function(radps) { radps / (2 * pi) },  # rad/s -> Hz
+  Hz2radps = function(Hz) { Hz * (2 * pi) },        # Hz -> rad/s
   
   # Viscoisty
   cP2Pas = function(cP) {cP / 1000},
