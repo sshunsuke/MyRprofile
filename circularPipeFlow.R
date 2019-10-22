@@ -1,3 +1,5 @@
+source("defaultSetting.R")
+
 # =============================================================================
 # Mukherjee & Brill.
 
@@ -46,16 +48,16 @@ MukherjeeBrill$calculateDLNs = function(vsG, vsL, D, densityG, densityL, viscosi
 	z <- 0.321 - ((0.017 * NGv) - 4.267 * sin(angle)) - (2.972 * NL) - (0.033 * log10(NGv)^2) - (3.925 * sin(angle)^2)
 	NLvST <- 10^z
 	
-	list(
+	data.frame(
 		NLv = NLv,      # Liquid velocity number  (4.3)
 		NGv = NGv,      # Gas velocity number     (4.4)
 		Nd = Nd,        # Pipe diameter number    (4.5)
 		NL = NL,        # Liquid viscosity number (4.6)
 		
 		NGvSM = NGvSM,            # Slug/(Annular Mist) transition (4.130)
+		NGvBS = NGvBS,            # Downflow: Bubble/Slug transition (4.131)
 		NLvBS_up = NLvBS_up,      # Upflow: Bubble/Slug transition (4.128)
-		NGvBS = NGvBS,  # Downflow: Bubble/Slug transition (4.131)
-		NLvST = NLvST,  # Downflow: Stratified (4.133)
+		NLvST = NLvST,            # Downflow: Stratified (4.133)
 		
 		# Input values (these are used in the calculations of holdup and dPdL).
 		vsG = vsG,
@@ -70,6 +72,11 @@ MukherjeeBrill$calculateDLNs = function(vsG, vsL, D, densityG, densityL, viscosi
 	)
 }
 
+
+
+
+
+
 # Check flow regime.
 # There are four flow regime types are defined in this function. 
 #   1: Stratified
@@ -77,45 +84,50 @@ MukherjeeBrill$calculateDLNs = function(vsG, vsL, D, densityG, densityL, viscosi
 #   3: Slug
 #   4: Bubbly
 MukherjeeBrill$checkFlowRegime <- function(DLNs) {
-	flowRegime <- 2  # annular 
-	
-	if (DLNs$NGv > DLNs$NGvSM) {
-		return (flowRegime)
-	}
-	
-	if (DLNs$angle > 0) {
-		# Upfill
-		if (DLNs$NLv > DLNs$NLvBS_up) {
-			flowRegime <- flowRegime <- 4  # bubbly
-		} else {
-			flowRegime <- flowRegime <- 3  # slug
-		}
-	} else if (abs(DLNs$angle) > deg2rad(-30)) {
-		# Downhill
-		if (DLNs$NGv > DLNs$NGvBS) {
-			if (DLNs$NLv > DLNs$NLvST) {
-				flowRegime <- flowRegime <- 3  # Slug
-			} else {
-				flowRegime <- flowRegime <- 1  # Stratified
-			}
-		} else {
-			flowRegime <- flowRegime <- 4    # bubbly
-		}
-	} else {
-		# DownStratified
-		if (DLNs$NLv > DLNs$NLvST) {
-			if (DLNs$NGv > NGvBS) {
-				flowRegime <- flowRegime <- 3  # Slug
-			} else {
-				flowRegime <- flowRegime <- 4    # bubbly
-			}
-		} else {
-			flowRegime <- flowRegime <- 1  # Stratified
-		}
-		
-	}
-	
-	return (flowRegime)
+  
+  #fun <- function(DLNs) {
+  fun <- function(NGv, NLv, angle, NGvSM, NGvBS, NLvBS_up, NLvST) {
+    flowRegime <- 2  # annular 
+    
+    if (NGv > NGvSM) {
+      return (flowRegime)
+    }
+    
+    if (angle > 0) {
+      # Upfill
+      if (NLv > NLvBS_up) {
+        flowRegime <- flowRegime <- 4  # bubbly
+      } else {
+        flowRegime <- flowRegime <- 3  # slug
+      }
+    } else if (abs(angle) > deg2rad(-30)) {
+      # Downhill
+      if (NGv > NGvBS) {
+        if (NLv > NLvST) {
+          flowRegime <- flowRegime <- 3  # Slug
+        } else {
+          flowRegime <- flowRegime <- 1  # Stratified
+        }
+      } else {
+        flowRegime <- flowRegime <- 4    # bubbly
+      }
+    } else {
+      # DownStratified
+      if (NLv > NLvST) {
+        if (NGv > NGvBS) {
+          flowRegime <- flowRegime <- 3    # Slug
+        } else {
+          flowRegime <- flowRegime <- 4    # bubbly
+        }
+      } else {
+        flowRegime <- flowRegime <- 1  # Stratified
+      }
+    }
+    
+    return (flowRegime)
+  }
+  
+  mapply(fun, DLNs$NGv, DLNs$NLv, DLNs$angle, DLNs$NGvSM, DLNs$NGvBS, DLNs$NLvBS_up, DLNs$NLvST)
 }
 
 
@@ -200,6 +212,7 @@ fr <- MukherjeeBrill$checkFlowRegime(exam)
 MukherjeeBrill$holdup(exam, fr)
 
 
+exam2 <- MukherjeeBrill$calculateDLNs(ft2m(c(3.86,0.1)), ft2m(3.97), inch2m(6), 5.88*ratio, 47.61*ratio, UC$cP2Pas(0.016), UC$cP2Pas(0.97), UC$dynpcm2Npm(8.41), pi/2)
 
 
 
