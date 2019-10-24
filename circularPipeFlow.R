@@ -1,21 +1,35 @@
 source("defaultSetting.R")
 
 # =============================================================================
-# Mukherjee & Brill.
-
-# densityMixS: mixture density with a consideration of slip
-
+# Mukherjee & Brill method to predict pressure drop and flow regime in inclined
+# two-Phase flow.
+#
+# The code in this file was written in accordance with the book titled 
+# "Multiphase Flow in Wells" written by Brill & Mukherjee in 1999 although the 
+# method was first published in Mukherjee & Brill (1985). 
+# 
+#   Mukherjee, H., Brill, J.P., 1985. Pressure drop correlations for inclined
+#   two-phase flow. J. Energy Resour. Technol. Trans. ASME 107, 549–554.
 # =============================================================================
+
+# 
+# densityMixS: mixture density with a consideration of slip
 
 MukherjeeBrill <- list()
 
-MukherjeeBrill$coefficients <- cbind(
-	c(-0.380113, 0.129875, -0.119788,  2.343227, 0.475686, 0.288657),   # Up
-	c(-1.330282, 4.808139,  4.171584, 56.262268, 0.079951, 0.504887),   # DownStratified
-	c(-0.516644, 0.789805,  0.551627, 15.519214, 0.371771, 0.393952)    # DownOther
-)
-colnames(MukherjeeBrill$coefficients) <- c("Up", "DownStratified", "DownOther")
-rownames(MukherjeeBrill$coefficients) <- paste("C", 1:6, sep="")
+# DLNs
+# flow regime
+# holdup
+# dPdL
+
+MukherjeeBrill$calculate <- function(vsG, vsL, D, densityG, densityL, viscosityG, viscosityL, surfaceTension, angle) {
+	DLNs <- MukherjeeBrill$calculateDLNs(vsG, vsL, D, densityG, densityL, viscosityG, viscosityL, surfaceTension, angle)
+	flowRegime <- MukherjeeBrill$checkFlowRegime(DLNs)
+	holdup <- MukherjeeBrill$holdup(DLNs, flowRegime)
+	dPdL <- MukherjeeBrill$dPdL(DLNs, flowRegime, holdup)
+	
+}
+
 
 
 # -----------------------------------------------------------------------------
@@ -71,13 +85,14 @@ MukherjeeBrill$calculateDLNs = function(vsG, vsL, D, densityG, densityL, viscosi
 }
 
 
-
-# Check flow regime.
+# -----------------------------------------------------------------------------
+# Determine flow regime.
 # There are four flow regime types are defined in this function. 
 #   1: Stratified
 #   2: Annular
 #   3: Slug
 #   4: Bubbly
+# -----------------------------------------------------------------------------
 MukherjeeBrill$checkFlowRegime <- function(DLNs) {
   
   #fun <- function(DLNs) {
@@ -125,16 +140,9 @@ MukherjeeBrill$checkFlowRegime <- function(DLNs) {
   mapply(fun, DLNs$NGv, DLNs$NLv, DLNs$angle, DLNs$NGvSM, DLNs$NGvBS, DLNs$NLvBS_up, DLNs$NLvST)
 }
 
-
-MukherjeeBrill$selectCoefficients <- function(DLNs, flowRegime) {
-	index <- ifelse(DLNs$angle > 0,
-									1,
-									ifelse((flowRegime == 1), 2, 3))
-	MukherjeeBrill$coefficients[,index]
-}
-
-
-	
+# -----------------------------------------------------------------------------
+# Estimate liquid holdup.
+# -----------------------------------------------------------------------------
 
 MukherjeeBrill$holdup <- function(DLNs, flowRegime) {
 	co <- MukherjeeBrill$selectCoefficients(DLNs, flowRegime)
@@ -144,43 +152,105 @@ MukherjeeBrill$holdup <- function(DLNs, flowRegime) {
 	exp(t1 * t2)
 }
 
-MukherjeeBrill$dPdL <- function(DLNs, flowRegime) {
-	HL <- MukherjeeBrill$holdup(DLNs, flowRegime)
-	
-	vmix <- DLNs$vsG + DLNs$vsL
-	HLnoslip <- DLNs$vsL / vmix
-	
-	densityMixS <- densityG * (1 - HL) + densityL * HL                    # (3.22)
-	densityMixN <- densityG * (1 - HLnoslip) + densityL * HLnoslip        # (3.23)
-	viscosityMixS <- viscosityG * (1 - HL) + viscosityL * HL              # (3.19)
-	viscosityMixN <- viscosityG * (1 - HLnoslip) + viscosityL * HLnoslip  # (3.21)
-
-	if (flowRegime == 3 | flowRegime == 4) {
-		# Slug or Bubble
-		Re <- densityMixN * vmix * DLNs$D / viscosityMixN
-		fD <- FCP$fD.Blasius(Re)
-		Ek <- densityMixS * vmix * vsG / p  # (4.137)
-		dPdL <- (fD * densityMixS * vmix^2 / (2 * D) + densityMixS * g * sin(angle)) / (1 - Ek)  # (4.136)
-	} else if (flowRegime == 2) {
-		# Annular
-		HR <- HLnoslip / HL
-		
-		Ek <- densityMixS * vmix * vsG / p  # (4.137)
-		
-		
-		
-	} else if (flowRegime == 1) {
-		# Stratified
-		
-		
-	} else {
-		# error
-	}
-		
-	
-	
+MukherjeeBrill$selectCoefficients <- function(DLNs, flowRegime) {
+	index <- ifelse(DLNs$angle > 0,
+									1,
+									ifelse((flowRegime == 1), 2, 3))
+	MukherjeeBrill$coefficients[,index]
 }
 
+MukherjeeBrill$coefficients <- cbind(
+	c(-0.380113, 0.129875, -0.119788,  2.343227, 0.475686, 0.288657),   # Up
+	c(-1.330282, 4.808139,  4.171584, 56.262268, 0.079951, 0.504887),   # DownStratified
+	c(-0.516644, 0.789805,  0.551627, 15.519214, 0.371771, 0.393952)    # DownOther
+)
+colnames(MukherjeeBrill$coefficients) <- c("Up", "DownStratified", "DownOther")
+rownames(MukherjeeBrill$coefficients) <- paste("C", 1:6, sep="")
+	
+
+# -----------------------------------------------------------------------------
+# dPdL
+# -----------------------------------------------------------------------------
+
+# Usage: MukherjeeBrill$ffRatio(HR)
+MukherjeeBrill$ffRatio <- (function(){
+	# Table 4.5
+	correspondence <- cbind(
+		c(1.00, 0.98, 1.20, 1.25, 1.30, 1.25, 1.00,  1.00),    # fR
+		c(0.01, 0.20, 0.30, 0.40, 0.50, 0.70, 1.00, 10.00)     # HR
+	)
+	colnames(correspondence) <- c("fR", "HR")
+	approxfun(correspondence[,"HR"], correspondence[,"fR"])
+})()
+
+
+MukherjeeBrill$dPdL <- function(DLNs, flowRegime, HL) {
+	dPdL <- NA
+
+	if (flowRegime == 1) {
+		# Stratified
+		
+		# delta: angle related to liquid level (shown in Fig 4.20)
+		fun <- function(delta) { 1/(2*pi) * (delta - sin(delta)) - HL }  # (4.147)
+		f <- uniroot(fun, c(0,2*pi))
+		delta <- f$root
+		
+		
+		
+		# 4.147
+		# 4.146 for hL/d
+		#   4.150 and 4.151
+		# 4.148 and 4.149
+		# 4.152 and 4.153
+		# 4.144 or 4.145
+		
+	} else {
+		vmix <- DLNs$vsG + DLNs$vsL
+		HLnoslip <- DLNs$vsL / vmix
+		
+		densityMixS <- DLNs$densityG * (1 - HL) + DLNs$densityL * HL                    # (3.22)
+		densityMixN <- DLNs$densityG * (1 - HLnoslip) + DLNs$densityL * HLnoslip        # (3.23)
+		viscosityMixS <- DLNs$viscosityG * (1 - HL) + DLNs$viscosityL * HL              # (3.19)
+		viscosityMixN <- DLNs$viscosityG * (1 - HLnoslip) + DLNs$viscosityL * HLnoslip  # (3.21)
+		
+		ReN <- DN$Reynolds(densityMixN, vmix, DLNs$D, viscosityMixN)
+
+		if (flowRegime == 2) {
+			# Annular
+			fn <- FCP$fD.Blasius(ReN)             # no-slip friction factor
+			HR <- HLnoslip / HL                   # (4.140)
+			fR <- MukherjeeBrill$ffRatio(HR)      # friction factor ratio
+			fD <- fn * fR                         # (4.141)
+			Ek <- densityMixS * vmix * vsG / p    # (4.137)
+			dPdL <- (fD * densityMixS * vmix^2 / (2 * D) + densityMixS * g * sin(angle)) / (1 - Ek)  # (4.139)
+		} else if (flowRegime == 3 | flowRegime == 4) {
+			# Slug or Bubble
+			fD <- FCP$fD.Blasius(ReN)
+			Ek <- densityMixS * vmix * vsG / p  # (4.137)
+			dPdL <- (fD * densityMixS * vmix^2 / (2 * D) + densityMixS * g * sin(angle)) / (1 - Ek)  # (4.136)
+		} else {
+			# error!
+		}
+	}
+	
+	dPdL
+}
+
+
+MukherjeeBrill$dPdLSlugBubble <- function(){
+	Re <- densityMixN * vmix * DLNs$D / viscosityMixN
+	fD <- FCP$fD.Blasius(Re)
+	Ek <- densityMixS * vmix * vsG / p  # (4.137)
+	dPdL <- (fD * densityMixS * vmix^2 / (2 * D) + densityMixS * g * sin(angle)) / (1 - Ek)  # (4.136)
+}
+
+
+
+
+
+# =============================================================================
+
+# =============================================================================
 
 
 isAnnularMist = function(DLNs) { DLNs$NGv > DLNs$NGvSM }
