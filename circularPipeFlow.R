@@ -86,7 +86,7 @@ MukherjeeBrill$calculateDLNs = function(vsG, vsL, D, densityG, densityL, viscosi
 
 
 # -----------------------------------------------------------------------------
-# Determine flow regime.
+# Determine flow regime (Fig 4.19).
 # There are four flow regime types are defined in this function. 
 #   1: Stratified
 #   2: Annular
@@ -210,7 +210,7 @@ MukherjeeBrill$dPdL <- function(DLNs, flowRegime, HL, pressure) {
 		PG <- (1 - delta / (2*pi)) * P    # 4.149
 		PL <- P - PG                      # 4.148
 		
-		# Shear stress
+		# Actual velocity
 		vG <- DLNs$vsG / (1-HL)           # 4.157
 		vL <- DLNs$vsL / HL               # 4.156
 		
@@ -239,7 +239,7 @@ MukherjeeBrill$dPdL <- function(DLNs, flowRegime, HL, pressure) {
 		if (missing(pressure) == TRUE) {
 			Ek <- 0
 		} else {
-			Ek <- densityMixS * vmix * DLNs$vsG / DLNs$pressure    # (4.53)  (4.137)
+			Ek <- densityMixS * vmix * DLNs$vsG / pressure    # (4.53)  (4.137)
 		}
 		
 		if (flowRegime == 2) {
@@ -295,12 +295,14 @@ MukherjeeBrill$coefficients
 #   densityG = 5.88 lbm/ft3, densityL = 47.61 lbm/ft3, 
 # Example 4.8
 #   viscosityG = 0.016 cp, viscosityL = 0.97 cp, surfaceTension = 8.41 dynes/cm, angle = 90 deg
-#     -> NLv = 11.87, NGvSM = 350.8, NLvBS_up = 18.40, HL = 0.560, dPdL = 0.209 psi/ft (= 4727 Pa/m)
+#     -> NLv = 11.87, NGvSM = 350.8, NLvBS_up = 18.40, (Slug flow), HL = 0.560, dPdL = 0.209 psi/ft (= 4727 Pa/m)
 ratio <- lbm2kg(1) / (ft2m(1)^3)
-exam <- MukherjeeBrill$calculateDLNs(ft2m(3.86), ft2m(3.97), inch2m(6), 5.88*ratio, 47.61*ratio, UC$cP2Pas(0.016), UC$cP2Pas(0.97), UC$dynpcm2Npm(8.41), pi/2)
+examMB <- MukherjeeBrill$calculateDLNs(ft2m(3.86), ft2m(3.97), inch2m(6), 5.88*ratio, 47.61*ratio, UC$cP2Pas(0.016), UC$cP2Pas(0.97), UC$dynpcm2Npm(8.41), pi/2)
 fr <- MukherjeeBrill$checkFlowRegime(exam)
 hol <- MukherjeeBrill$holdup(exam, fr)
 MukherjeeBrill$dPdL(exam, fr, hol)
+MukherjeeBrill$dPdL(exam, fr, hol, 100*1000)        # p = 100 kPa
+MukherjeeBrill$dPdL(exam, fr, hol, 10*1000*1000)    # p = 10 MPa
 
 exam2 <- MukherjeeBrill$calculateDLNs(ft2m(c(3.86, 0.1)), ft2m(3.97), inch2m(6), 5.88*ratio, 47.61*ratio, UC$cP2Pas(0.016), UC$cP2Pas(0.97), UC$dynpcm2Npm(8.41), c(pi/2, -0.1))
 fr2 <- MukherjeeBrill$checkFlowRegime(exam2)
