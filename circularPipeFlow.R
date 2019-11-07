@@ -159,6 +159,7 @@ MukherjeeBrill$selectCoefficients <- function(DLNs, flowRegime) {
 	MukherjeeBrill$coefficients[,index]
 }
 
+# Table 4.4
 MukherjeeBrill$coefficients <- cbind(
 	c(-0.380113, 0.129875, -0.119788,  2.343227, 0.475686, 0.288657),   # Up
 	c(-1.330282, 4.808139,  4.171584, 56.262268, 0.079951, 0.504887),   # DownStratified
@@ -184,7 +185,7 @@ MukherjeeBrill$ffRatio <- (function(){
 })()
 
 
-MukherjeeBrill$dPdL <- function(DLNs, flowRegime, HL) {
+MukherjeeBrill$dPdL <- function(DLNs, flowRegime, HL, pressure) {
 	dPdL <- NA
 
 	if (flowRegime == 1) {
@@ -198,7 +199,6 @@ MukherjeeBrill$dPdL <- function(DLNs, flowRegime, HL) {
 		# Flow area of each phase
 		AL <- circle$area(DLNs$D / 2) * HL         # (4.147)
 		AG <- circle$area(DLNs$D / 2) * (1 - HL)
-		
 		
 		# 4.146 for hL/d
 		#   4.150 and 4.151
@@ -235,20 +235,25 @@ MukherjeeBrill$dPdL <- function(DLNs, flowRegime, HL) {
 		viscosityMixN <- DLNs$viscosityG * (1 - HLnoslip) + DLNs$viscosityL * HLnoslip  # (3.21)
 		
 		ReN <- DN$Reynolds(densityMixN, vmix, DLNs$D, viscosityMixN)
-
+		
+		if (missing(pressure) == TRUE) {
+			Ek <- 0
+		} else {
+			Ek <- densityMixS * vmix * DLNs$vsG / DLNs$pressure    # (4.53)  (4.137)
+		}
+		
 		if (flowRegime == 2) {
 			# Annular
 			fn <- FCP$fD.Blasius(ReN)             # no-slip friction factor
 			HR <- HLnoslip / HL                   # (4.140)
 			fR <- MukherjeeBrill$ffRatio(HR)      # friction factor ratio
 			fD <- fn * fR                         # (4.141)
-			Ek <- densityMixS * vmix * vsG / p    # (4.53)  (4.137)
-			dPdL <- (fD * densityMixS * vmix^2 / (2 * D) + densityMixS * g * sin(angle)) / (1 - Ek)  # (4.139)
+			
+			dPdL <- (fD * densityMixS * vmix^2 / (2 * DLNs$D) + densityMixS * g * sin(DLNs$angle)) / (1 - Ek)  # (4.139)
 		} else if (flowRegime == 3 | flowRegime == 4) {
 			# Slug or Bubble
 			fD <- FCP$fD.Blasius(ReN)
-			Ek <- densityMixS * vmix * DLNs$vsG / DLNs$  # (4.137)
-			dPdL <- (fD * densityMixS * vmix^2 / (2 * D) + densityMixS * g * sin(angle)) / (1 - Ek)  # (4.136)
+			dPdL <- (fD * densityMixS * vmix^2 / (2 * DLNs$D) + densityMixS * g * sin(DLNs$angle)) / (1 - Ek)  # (4.136)
 		} else {
 			# error!
 		}
@@ -290,6 +295,7 @@ MukherjeeBrill$coefficients
 #   densityG = 5.88 lbm/ft3, densityL = 47.61 lbm/ft3, 
 # Example 4.8
 #   viscosityG = 0.016 cp, viscosityL = 0.97 cp, surfaceTension = 8.41 dynes/cm, angle = 90 deg
+#     -> NLv = 11.87, NGvSM = 350.8, NLvBS_up = 18.40, HL = 0.560, dPdL = 0.209 psi/ft (= 4727 Pa/m)
 ratio <- lbm2kg(1) / (ft2m(1)^3)
 exam <- MukherjeeBrill$calculateDLNs(ft2m(3.86), ft2m(3.97), inch2m(6), 5.88*ratio, 47.61*ratio, UC$cP2Pas(0.016), UC$cP2Pas(0.97), UC$dynpcm2Npm(8.41), pi/2)
 fr <- MukherjeeBrill$checkFlowRegime(exam)
@@ -299,8 +305,8 @@ MukherjeeBrill$dPdL(exam, fr, hol)
 exam2 <- MukherjeeBrill$calculateDLNs(ft2m(c(3.86, 0.1)), ft2m(3.97), inch2m(6), 5.88*ratio, 47.61*ratio, UC$cP2Pas(0.016), UC$cP2Pas(0.97), UC$dynpcm2Npm(8.41), c(pi/2, -0.1))
 fr2 <- MukherjeeBrill$checkFlowRegime(exam2)
 MukherjeeBrill$selectCoefficients(exam2, fr2)
-MukherjeeBrill$holdup(exam2, fr2)
-
+hol2 <-MukherjeeBrill$holdup(exam2, fr2)
+MukherjeeBrill$dPdL(exam2, fr2, hol2)
 
 
 
