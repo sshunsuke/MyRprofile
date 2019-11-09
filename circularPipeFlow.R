@@ -94,51 +94,51 @@ MukherjeeBrill$calculateDLNs = function(vsG, vsL, D, densityG, densityL, viscosi
 #   4: Bubbly
 # -----------------------------------------------------------------------------
 MukherjeeBrill$checkFlowRegime <- function(DLNs) {
+  mapply(MukherjeeBrill$checkFlowRegimeCore,
+         DLNs$NGv, DLNs$NLv, DLNs$angle, DLNs$NGvSM, DLNs$NGvBS, DLNs$NLvBS_up, DLNs$NLvST)
+}
   
-  #fun <- function(DLNs) {
-  fun <- function(NGv, NLv, angle, NGvSM, NGvBS, NLvBS_up, NLvST) {
-    flowRegime <- 2  # annular 
-    
-    if (NGv > NGvSM) {
-      return (flowRegime)  # Annular
+MukherjeeBrill$checkFlowRegimeCore <- function(NGv, NLv, angle, NGvSM, NGvBS, NLvBS_up, NLvST) {
+  flowRegime <- 2  # annular 
+  
+  if (NGv > NGvSM) {
+    return (flowRegime)  # Annular
+  }
+  
+  if (angle > 0) {
+    # Upfill
+    if (NLv > NLvBS_up) {
+      flowRegime <- 4  # bubbly
+    } else {
+      flowRegime <- 3  # slug
     }
-    
-    if (angle > 0) {
-      # Upfill
-      if (NLv > NLvBS_up) {
-        flowRegime <- 4  # bubbly
+  } else if (abs(angle) > deg2rad(-30)) {
+    # Downhill
+    if (NGv > NGvBS) {
+      if (NLv > NLvST) {
+        flowRegime <- 3  # Slug
       } else {
-        flowRegime <- 3  # slug
+        flowRegime <- 1  # Stratified
       }
-    } else if (abs(angle) > deg2rad(-30)) {
-      # Downhill
+    } else {
+      flowRegime <- 4    # bubbly
+    }
+  } else {
+    # DownStratified
+    if (NLv > NLvST) {
       if (NGv > NGvBS) {
-        if (NLv > NLvST) {
-          flowRegime <- 3  # Slug
-        } else {
-          flowRegime <- 1  # Stratified
-        }
+        flowRegime <- 3    # Slug
       } else {
         flowRegime <- 4    # bubbly
       }
     } else {
-      # DownStratified
-      if (NLv > NLvST) {
-        if (NGv > NGvBS) {
-          flowRegime <- 3    # Slug
-        } else {
-          flowRegime <- 4    # bubbly
-        }
-      } else {
-        flowRegime <- 1  # Stratified
-      }
+      flowRegime <- 1  # Stratified
     }
-    
-    return (flowRegime)
   }
   
-  mapply(fun, DLNs$NGv, DLNs$NLv, DLNs$angle, DLNs$NGvSM, DLNs$NGvBS, DLNs$NLvBS_up, DLNs$NLvST)
+  return (flowRegime)
 }
+
 
 # -----------------------------------------------------------------------------
 # Estimate liquid holdup.
@@ -186,6 +186,18 @@ MukherjeeBrill$ffRatio <- (function(){
 
 
 MukherjeeBrill$dPdL <- function(DLNs, flowRegime, HL, pressure) {
+  if (missing(pressure) == TRUE) {
+    pressure <- NA
+  }
+  
+  mapply(MukherjeeBrill$dPdLCore,
+         DLNs$D, DLNs$vsG, DLNs$vsL, DLNs$densityG, DLNs$densityL, DLNs$viscosityG, DLNs$viscosityL, DLNs$angle,
+         flowRegime, HL, pressure)
+}
+
+
+MukherjeeBrill$dPdLCore <- function(D, vsG, vsL, densityG, densityL, viscosityG, viscosityL, angle,
+                                    flowRegime, HL, pressure) {
 	dPdL <- NA
 
 	if (flowRegime == 1) {
@@ -197,49 +209,49 @@ MukherjeeBrill$dPdL <- function(DLNs, flowRegime, HL, pressure) {
 		delta <- f$root
 		
 		# Flow area of each phase
-		AL <- circle$area(DLNs$D / 2) * HL         # (4.147)
-		AG <- circle$area(DLNs$D / 2) * (1 - HL)
+		AL <- circle$area(D / 2) * HL         # (4.147)
+		AG <- circle$area(D / 2) * (1 - HL)
 		
 		# 4.146 for hL/d
 		#   4.150 and 4.151
-		dhG <- DLNs$D * (2*pi - (delta - sin(delta))) / (2*pi - delta + 2 * sin(delta/2))    # (4.150)
-		dhL <- DLNs$D * (delta - sin(delta)) / (delta + 2 * sin(delta / 2))                  # (4.151)
+		dhG <- D * (2*pi - (delta - sin(delta))) / (2*pi - delta + 2 * sin(delta/2))    # (4.150)
+		dhL <- D * (delta - sin(delta)) / (delta + 2 * sin(delta / 2))                  # (4.151)
 		
 		# Perimeter
-		P <- DLNs$D * pi
+		P <- D * pi
 		PG <- (1 - delta / (2*pi)) * P    # 4.149
 		PL <- P - PG                      # 4.148
 		
 		# Actual velocity
-		vG <- DLNs$vsG / (1-HL)           # 4.157
-		vL <- DLNs$vsL / HL               # 4.156
+		vG <- vsG / (1-HL)           # 4.157
+		vL <- vsL / HL               # 4.156
 		
-		ReG <- DN$Reynolds(DLNs$densityG, vG, dhG, DLNs$viscosityG)   # (4.155)
-		ReL <- DN$Reynolds(DLNs$densityL, vL, dhL, DLNs$viscosityL)   # (4.154)
+		ReG <- DN$Reynolds(densityG, vG, dhG, viscosityG)   # (4.155)
+		ReL <- DN$Reynolds(densityL, vL, dhL, viscosityL)   # (4.154)
 		
 		fDG <- FCP$fD.Blasius(ReG)
 		fDL <- FCP$fD.Blasius(ReL)
 		
-		shearStressG <- fDG * DLNs$densityG * vG^2 / (2*g)    # 4.153
-		shearStressL <- fDL * DLNs$densityL * vL^2 / (2*g)    # 4.152
+		shearStressG <- fDG * densityG * vG^2 / (2*g)    # 4.153
+		shearStressL <- fDL * densityL * vL^2 / (2*g)    # 4.152
 		
 		# dPdL (4.144)
-		dPdL <- - (shearStressL * PL + shearStressG * PG) - (DLNs$viscosityL * AL + DLNs$viscosityG * AG) * g * sin(DLNs$angle)
+		dPdL <- - (shearStressL * PL + shearStressG * PG) - (viscosityL * AL + viscosityG * AG) * g * sin(angle)
 	} else {
-		vmix <- DLNs$vsG + DLNs$vsL
-		HLnoslip <- DLNs$vsL / vmix
+		vmix <- vsG + vsL
+		HLnoslip <- vsL / vmix
 		
-		densityMixS <- DLNs$densityG * (1 - HL) + DLNs$densityL * HL                    # (3.22)
-		densityMixN <- DLNs$densityG * (1 - HLnoslip) + DLNs$densityL * HLnoslip        # (3.23)
-		viscosityMixS <- DLNs$viscosityG * (1 - HL) + DLNs$viscosityL * HL              # (3.19)
-		viscosityMixN <- DLNs$viscosityG * (1 - HLnoslip) + DLNs$viscosityL * HLnoslip  # (3.21)
+		densityMixS <- densityG * (1 - HL) + densityL * HL                    # (3.22)
+		densityMixN <- densityG * (1 - HLnoslip) + densityL * HLnoslip        # (3.23)
+		viscosityMixS <- viscosityG * (1 - HL) + viscosityL * HL              # (3.19)
+		viscosityMixN <- viscosityG * (1 - HLnoslip) + viscosityL * HLnoslip  # (3.21)
 		
-		ReN <- DN$Reynolds(densityMixN, vmix, DLNs$D, viscosityMixN)
+		ReN <- DN$Reynolds(densityMixN, vmix, D, viscosityMixN)
 		
-		if (missing(pressure) == TRUE) {
+		if (is.na(pressure) == TRUE) {
 			Ek <- 0
 		} else {
-			Ek <- densityMixS * vmix * DLNs$vsG / pressure    # (4.53)  (4.137)
+			Ek <- densityMixS * vmix * vsG / pressure    # (4.53)  (4.137)
 		}
 		
 		if (flowRegime == 2) {
@@ -249,11 +261,11 @@ MukherjeeBrill$dPdL <- function(DLNs, flowRegime, HL, pressure) {
 			fR <- MukherjeeBrill$ffRatio(HR)      # friction factor ratio
 			fD <- fn * fR                         # (4.141)
 			
-			dPdL <- (fD * densityMixS * vmix^2 / (2 * DLNs$D) + densityMixS * g * sin(DLNs$angle)) / (1 - Ek)  # (4.139)
+			dPdL <- (fD * densityMixS * vmix^2 / (2 * D) + densityMixS * g * sin(angle)) / (1 - Ek)  # (4.139)
 		} else if (flowRegime == 3 | flowRegime == 4) {
 			# Slug or Bubble
 			fD <- FCP$fD.Blasius(ReN)
-			dPdL <- (fD * densityMixS * vmix^2 / (2 * DLNs$D) + densityMixS * g * sin(DLNs$angle)) / (1 - Ek)  # (4.136)
+			dPdL <- (fD * densityMixS * vmix^2 / (2 * D) + densityMixS * g * sin(angle)) / (1 - Ek)  # (4.136)
 		} else {
 			# error!
 		}
@@ -298,13 +310,15 @@ MukherjeeBrill$coefficients
 #     -> NLv = 11.87, NGvSM = 350.8, NLvBS_up = 18.40, (Slug flow), HL = 0.560, dPdL = 0.209 psi/ft (= 4727 Pa/m)
 ratio <- lbm2kg(1) / (ft2m(1)^3)
 examMB <- MukherjeeBrill$calculateDLNs(ft2m(3.86), ft2m(3.97), inch2m(6), 5.88*ratio, 47.61*ratio, UC$cP2Pas(0.016), UC$cP2Pas(0.97), UC$dynpcm2Npm(8.41), pi/2)
-fr <- MukherjeeBrill$checkFlowRegime(exam)
-hol <- MukherjeeBrill$holdup(exam, fr)
-MukherjeeBrill$dPdL(exam, fr, hol)
-MukherjeeBrill$dPdL(exam, fr, hol, 100*1000)        # p = 100 kPa
-MukherjeeBrill$dPdL(exam, fr, hol, 10*1000*1000)    # p = 10 MPa
+fr <- MukherjeeBrill$checkFlowRegime(examMB)
+hol <- MukherjeeBrill$holdup(examMB, fr)
+MukherjeeBrill$dPdL(examMB, fr, hol)
+MukherjeeBrill$dPdL(examMB, fr, hol, 100*1000)        # p = 100 kPa
+MukherjeeBrill$dPdL(examMB, fr, hol, 10*1000*1000)    # p = 10 MPa
 
-exam2 <- MukherjeeBrill$calculateDLNs(ft2m(c(3.86, 0.1)), ft2m(3.97), inch2m(6), 5.88*ratio, 47.61*ratio, UC$cP2Pas(0.016), UC$cP2Pas(0.97), UC$dynpcm2Npm(8.41), c(pi/2, -0.1))
+
+exam2 <- MukherjeeBrill$calculateDLNs(ft2m(c(3.86, 3.86, 0.1)), ft2m(3.97), inch2m(6), 5.88*ratio, 47.61*ratio,
+                                      UC$cP2Pas(0.016), UC$cP2Pas(0.97), UC$dynpcm2Npm(8.41), c(pi/2, -0.1, pi/2))
 fr2 <- MukherjeeBrill$checkFlowRegime(exam2)
 MukherjeeBrill$selectCoefficients(exam2, fr2)
 hol2 <-MukherjeeBrill$holdup(exam2, fr2)
