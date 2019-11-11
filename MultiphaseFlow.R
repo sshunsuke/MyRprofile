@@ -5,34 +5,34 @@ Ansari$Util <- list()
 
 
 Ansari$Slug <- function(vsG, vsL, D, densityG, densityL, viscosityG, viscosityL, surfaceTension, tol=1e-8) {
-	Vmix = vsG + vsL
+	vmix = vsG + vsL
 	
 	# Bubble Rise Velocity - 4.160
-	Vbr = 1.53 * ((g * surfaceTension * (densityL - densityG)) / densityL^2) ^ 0.25
+	vbr = 1.53 * ((g * surfaceTension * (densityL - densityG)) / densityL^2) ^ 0.25
 	
 	# Void ration (and holdup) of liquid slug - 4.194
-	Hgls = vsG / (0.425 + 2.65 * Vmix)
+	Hgls = vsG / (0.425 + 2.65 * vmix)
 	Hlls = 1 - Hgls
 	
 	# Taylor-bubble-rise Velocity - 4.190
-	Vtb = 1.2 * Vmix + 0.35 * ((g * D * (densityL - densityG)) / densityL^2) ^ 0.5
+	vtb = 1.2 * vmix + 0.35 * ((g * D * (densityL - densityG)) / densityL^2) ^ 0.5
 	
 	# Gas velocity in liquid slug - 4.191
-	Vgls = 1.2 * Vmix + Vbr * Hlls^0.5
+	vgls = 1.2 * vmix + vbr * Hlls^0.5
 	
 	# Holdup (and void ratio) in Taylor bubble section (4.196-199)
 	Hltb = Ansari$SlugHltb(D, vmix, Hgls, vtb, vgls, tol=tol)
 	Hgtb = 1 - Hltb
 	
 	# Velocity of falling liquid film in Taylor-bubble section (4.193)
-	Vltb = - 9.916 * ( g * D * (1 - sqrt(Hgtb)) )^0.5
+	vltb = - 9.916 * ( g * D * (1 - sqrt(Hgtb)) )^0.5
 	
 	# Mass balance of liquid with respect to Taylor-bubble section (4.188)
-	Vlls = Vtb - (vtb - Vltb) * (Hltb / Hlls)
-	#Vlls = (Vmix - Vgls * (1 - Hlls)) / Hlls
+	vlls = vtb - (vtb - vltb) * (Hltb / Hlls)
+	#Vlls = (vmix - Vgls * (1 - Hlls)) / Hlls
 
 	# Mass balance of gas with respect to Taylor-bubble section (4.189)
-	vgtb = vtb - (vtb - Vgls) * (Hgls / Hgtb)
+	vgtb = vtb - (vtb - vgls) * (Hgls / Hgtb)
 	
 	# ----------------------------------------
 	
@@ -40,11 +40,12 @@ Ansari$Slug <- function(vsG, vsL, D, densityG, densityL, viscosityG, viscosityL,
 	filmThickness = (vltb^2) / (196.7 * g)
 	
 	# Ratio between Taylor bubble and liquid slug (4.185-4.187)
-	Ltb_Lu <- (vsL - Vlls * Hlls) / (Vltb * Hltb - Vlls * Hlls)
+	Ltb_Lu <- (vsL - vlls * Hlls) / (vltb * Hltb - vlls * Hlls)
 	Lls_Lu <- 1 - Ltb_Lu
 	
 	Hlu <- Ltb_Lu * Hltb + Lls_Lu * Hlls
 	
+	data.frame(Hgls, Hlls, vgls, vlls, Hgtb, Hltb, vgtb, vltb, Hlu, filmThickness)
 }
 
 
@@ -76,6 +77,30 @@ Ansari$SlugHltb <- function(D, vmix, Hgls, vtb, vgls, tol=1e-8) {
 
 
 
+
+
+# -------------
+
+# test
+
+# flowProperties(P, T, diameter, Qgstd, Ql, ipDiameter=0, inclination=pi/2)
+
+#fp_ <- flowProperties(200*1000, 273.15+10, inch2m(5.9), 24000/24/3600, 200/24/3600, inclination=pi/2)
+#dPcalc(fp_, 10, FR$SLUG)
+
+# * thickness: 0.005244 (m),  Lls_Lu: 0.126009,  Ltb_Lu: 0.873991 
+# * Hlls: 0.635680,  Hltb: 0.135073,  Hlu: 0.198155,   
+# - Vmix: 8.279308 (m/sec),  Vtb: 10.184623 (m/sec) 
+# - Vgls: 10.134058 (m/sec),  Vgtb: 10.163324 (m/sec),  Vlls: 7.216317 (m/sec),  Vltb: -3.784761 (m/sec) 
+# - densityU: 205 (kg/m3),  densityLS: 654.0 (kg/m3),  viscosityLS: 0.000894 (Pa-s) 
+# - ReLS: 907410.0,  fLS: 0.003999,  SSls: 89.6 (N/m2),  SSwf: -50.3 (N/m2) 
+# * dP_H: 2007.0 (Pa/m),  dP_F: -872.9 (Pa/m),  dP_A: 0.0 (Pa/m) 
+# * diffP: 11340.7 (Pa),  dZ: 10.0 (m) 
+
+#Ansari$Slug <- function(vsG, vsL, D, densityG, densityL, viscosityG, viscosityL, surfaceTension, tol=1e-8) 
+
+
+Ansari$Slug(8.148071, 0.1312366, 0.14986, 1.368176,  1027.98, 1.065058e-05, 0.001400565, 0.07422209)
 
 
 
