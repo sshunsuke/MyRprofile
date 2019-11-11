@@ -11,14 +11,14 @@ Ansari$Slug <- function(vsG, vsL, D, densityG, densityL, viscosityG, viscosityL,
 	Vbr = 1.53 * ((g * surfaceTension * (densityL - densityG)) / densityL^2) ^ 0.25
 	
 	# Void ration (and holdup) of liquid slug - 4.194
-	Hgls = fp$Vsg / (0.425 + 2.65 * fp$Vmix)
+	Hgls = vsG / (0.425 + 2.65 * Vmix)
 	Hlls = 1 - Hgls
 	
 	# Taylor-bubble-rise Velocity - 4.190
-	Vtb <- 1.2 * Vmix + 0.35 * ((g * D * (densityL - densityG)) / densityL^2) ^ 0.5
+	Vtb = 1.2 * Vmix + 0.35 * ((g * D * (densityL - densityG)) / densityL^2) ^ 0.5
 	
 	# Gas velocity in liquid slug - 4.191
-	Vgls <- 1.2 * Vmix + Vbr * Hlls^0.5
+	Vgls = 1.2 * Vmix + Vbr * Hlls^0.5
 	
 	# Holdup (and void ratio) in Taylor bubble section (4.196-199)
 	Hltb = Ansari$SlugHltb(D, vmix, Hgls, vtb, vgls, tol=tol)
@@ -43,7 +43,7 @@ Ansari$Slug <- function(vsG, vsL, D, densityG, densityL, viscosityG, viscosityL,
 	Ltb_Lu <- (vsL - Vlls * Hlls) / (Vltb * Hltb - Vlls * Hlls)
 	Lls_Lu <- 1 - Ltb_Lu
 	
-	Hlu <- Ltb_Lu * tbp$Hltb + Lls_Lu * Hlls
+	Hlu <- Ltb_Lu * Hltb + Lls_Lu * Hlls
 	
 }
 
