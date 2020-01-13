@@ -514,61 +514,60 @@ LMTD = (function() {
 
   list(
 
-  # Meaning of the symbols:
-  #   dT   in         out
-  #
-  #   T1   in ------> out
-  #   T2  out <------ in
-  counterCurrent = function(T1_in, T1_out, T2_in, T2_out) {
-    # Error check of inputs
-    if (T1_in > T2_out) {
-      assert(T1_out > T2_in, "Temperature of line-1 must be higher at both ends (T1 > T2).", T1_in, T1_out, T2_in, T2_out)
-      assert(T1_in > T1_out, "Fluid of line-1 must be cooled down (T1_in > T1_out) because of 'T1_in > T2_out'.", T1_in, T1_out, T2_in, T2_out)
-      assert(T2_in < T2_out, "Fluid of line-2 must be warmed up (T2_in < T2_out) because of 'T1_in > T2_out'.", T1_in, T1_out, T2_in, T2_out)
-    } else if (T1_in < T2_out) {
-      assert(T1_out < T2_in, "Temperature of line-1 must be lower at both ends (T1 < T2).", T1_in, T1_out, T2_in, T2_out)
-      assert(T1_in < T1_out, "Fluid of line-1 must be warmed up (T1_in < T1_out) because of 'T1_in < T2_out'.", T1_in, T1_out, T2_in, T2_out)
-      assert(T2_in > T2_out, "Fluid of line-2 must be cooled down (T2_in > T2_out) because of 'T1_in < T2_out'.", T1_in, T1_out, T2_in, T2_out)
-    } else {
-      # some check may be required.
-    }
+    # Meaning of the symbols:
+  	#   dT   in         out
+  	#
+  	#   T1   in ------> out
+  	#   T2  out <------ in
+  	counterCurrent = function(T1_in, T1_out, T2_in, T2_out) {
+  		# Error check of inputs
+  		if (T1_in > T2_out) {
+  			assert(T1_out > T2_in, "Temperature of line-1 must be higher at both ends (T1 > T2).", T1_in, T1_out, T2_in, T2_out)
+  			assert(T1_in > T1_out, "Fluid of line-1 must be cooled down (T1_in > T1_out) because of 'T1_in > T2_out'.", T1_in, T1_out, T2_in, T2_out)
+  			assert(T2_in < T2_out, "Fluid of line-2 must be warmed up (T2_in < T2_out) because of 'T1_in > T2_out'.", T1_in, T1_out, T2_in, T2_out)
+  		} else if (T1_in < T2_out) {
+  			assert(T1_out < T2_in, "Temperature of line-1 must be lower at both ends (T1 < T2).", T1_in, T1_out, T2_in, T2_out)
+  			assert(T1_in < T1_out, "Fluid of line-1 must be warmed up (T1_in < T1_out) because of 'T1_in < T2_out'.", T1_in, T1_out, T2_in, T2_out)
+        assert(T2_in > T2_out, "Fluid of line-2 must be cooled down (T2_in > T2_out) because of 'T1_in < T2_out'.", T1_in, T1_out, T2_in, T2_out)
+      } else {
+        # some check may be required.
+      }
     
-    dT_in  <- T1_in - T2_out
-    dT_out <- T1_out - T2_in
-    (dT_in - dT_out) / log(dT_in / dT_out)
-  },
+      dT_in  <- T1_in - T2_out
+      dT_out <- T1_out - T2_in
+      (dT_in - dT_out) / log(dT_in / dT_out)
+    },
   
-  # Meaning of the symbols:
-  #   dT   in         out
-  #
-  #   T1   in ------> out
-  #   T2   in ------> out
-  coCurrent = function(T1_in, T1_out, T2_in, T2_out) {
-    # Error check of inputs
-    if (T1_in > T2_in) {
-      assert(T1_out > T2_out, "Temperature of line-1 must be higher at both ends (T1 > T2).", T1_in, T1_out, T2_in, T2_out)
-      assert(T1_in > T1_out, "Fluid of line-1 must be cooled down (T1_in > T1_out) because of 'T1_in > T2_in'.", T1_in, T1_out, T2_in, T2_out)
-      assert(T2_in < T2_out, "Fluid of line-2 must be warmed up (T2_in < T2_out) because of 'T1_in > T2_in'.", T1_in, T1_out, T2_in, T2_out)
-    } else if (T1_in < T2_in) {
-      assert(T1_out < T2_out, "Temperature of line-1 must be lower at both ends (T1 < T2).", T1_in, T1_out, T2_in, T2_out)
-      assert(T1_in < T1_out, "Fluid of line-1 must be warmed up (T1_in < T1_out) because of 'T1_in < T2_out'.", T1_in, T1_out, T2_in, T2_out)
-      assert(T2_in > T2_out, "Fluid of line-2 must be cooled down (T2_in > T2_out) because of 'T1_in < T2_out'.", T1_in, T1_out, T2_in, T2_out)
-    } else {
-      assert(T1_out == T2_out, "Temperature of both fluids must be same at outlet (T1_out == T2_out).", T1_in, T1_out, T2_in, T2_out)
-    }
+    # Meaning of the symbols:
+    #   dT   in         out
+    #
+    #   T1   in ------> out
+    #   T2   in ------> out
+    coCurrent = function(T1_in, T1_out, T2_in, T2_out) {
+      # Error check of inputs
+      if (T1_in > T2_in) {
+        assert(T1_out > T2_out, "Temperature of line-1 must be higher at both ends (T1 > T2).", T1_in, T1_out, T2_in, T2_out)
+        assert(T1_in > T1_out, "Fluid of line-1 must be cooled down (T1_in > T1_out) because of 'T1_in > T2_in'.", T1_in, T1_out, T2_in, T2_out)
+        assert(T2_in < T2_out, "Fluid of line-2 must be warmed up (T2_in < T2_out) because of 'T1_in > T2_in'.", T1_in, T1_out, T2_in, T2_out)
+      } else if (T1_in < T2_in) {
+        assert(T1_out < T2_out, "Temperature of line-1 must be lower at both ends (T1 < T2).", T1_in, T1_out, T2_in, T2_out)
+        assert(T1_in < T1_out, "Fluid of line-1 must be warmed up (T1_in < T1_out) because of 'T1_in < T2_out'.", T1_in, T1_out, T2_in, T2_out)
+        assert(T2_in > T2_out, "Fluid of line-2 must be cooled down (T2_in > T2_out) because of 'T1_in < T2_out'.", T1_in, T1_out, T2_in, T2_out)
+      } else {
+        assert(T1_out == T2_out, "Temperature of both fluids must be same at outlet (T1_out == T2_out).", T1_in, T1_out, T2_in, T2_out)
+      }
     
-    dT_in  <- T1_in - T2_in
-    dT_out  <- T1_out - T2_out
-    (dT_in - dT_out) / log(dT_in / dT_out)
-  },
+      dT_in  <- T1_in - T2_in
+      dT_out  <- T1_out - T2_out
+      (dT_in - dT_out) / log(dT_in / dT_out)
+    },
   
-  # LMTD for a pipe flow with constant ambient T
-  #         Tamb
-  # T   in ------> out
-  constantAmbientT = function(Tin, Tout, Tamb) {
-    HeatExchange$LMTD$coCurrent(Tin, Tout, Tamb, Tamb)
-  }
-  
+    # LMTD for a pipe flow with constant ambient T
+    #         Tamb
+    # T   in ------> out
+    constantAmbientT = function(Tin, Tout, Tamb) {
+      HeatExchange$LMTD$coCurrent(Tin, Tout, Tamb, Tamb)
+    }
   )
 
 })()

@@ -76,9 +76,6 @@ Ansari$SlugHltb <- function(D, vmix, Hgls, vtb, vgls, tol=1e-8) {
 
 
 
-
-
-
 # -------------
 
 # test
@@ -116,10 +113,234 @@ Ansari$Util$VbrHarmathy <- function(densityG, densityL, surfaceTension) {
 }
 
 
+# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+
+
+Gomez <- list()
+Gomez$Util <- list()
+
+Gomez$Slug <- function(vsG, vsL, D, densityG, densityL, viscosityG, viscosityL, surfaceTension, inclination, tol=1e-8) {
+	vmix = vsG + vsL
+	
+	
+	
+	# Taylor-bubble-rise Velocity - Bendiksen (1984) : Gomez (40)
+	vtb = 1.2 * vmix + (0.542 * (g*fp$De)^0.5 * cos(inclination) + 0.351 * (g*fp$De)^0.5 * sin(inclination))
+	
+	
+	
+	
+
+
+}
 
 
 
 
+
+# -----------------------------------------------------------------------------
+
+dPcalc.slug.H.dP <- function(fp, dZ) {
+	cat("dPCalc.slug.H.dP()")
+	
+	INFO("START:  dPcalc.slug.H.dP()")
+	
+	dDensity <- fp$densityL - fp$densityG
+	
+	# Velocity of Taylor bubble - Bendiksen (1984) : Gomez (40)
+	Vtb <- dPcalc.correlation.slug.Vtb.Bendiksen(fp)
+	
+	# Holdup in liquid slug - Gregory [4]
+	Hlls <- dPcalc.correlation.slugH.Hlls.Gregory(fp)
+	
+	# Gas velocity in liquid slug - Gomez (57), (58)
+	Vgls <- dPcalc.correlation.slug.Vgls.Gomez(fp, dDensity, Hlls)
+	
+	# Holdup in slug unit
+	Hlu <- (Vtb * Hlls + Vgls * (1 - Hlls) - fp$Vsg) / Vtb
+	
+	DEBUG("  Hlls: %f,  Hlu: %f,  Vgls: %f (m/sec), Vtb: %f (m/sec)", Hlls, Hlu, Vgls, Vtb)
+	DEBUG("  - - - - -")  
+	
+	# Finding liquid level (hl) in Taylor bubble section.
+	funH <<- function(hl_) {
+		DEBUG("  fun():")
+		DEBUG("    hl_ = %f (m)", hl_)
+		shp_ <- dPcalc.slug.H.properties(fp, hl_, Hlls, Vgls, Vtb)
+		if (DEBUG_LOG$LEVEL >= DEBUG_LOG$LEVEL_TRACE) {
+			TRACE( "  Hlls: %f,  Hlu: %f,  Vgls: %f (m/sec), Vtb: %f (m/sec)", Hlls, Hlu, Vgls, Vtb )
+			TRACE( dPcalc.slug.H.flowProperties.toString(shp_) )
+		}
+		
+		if (shp_$Vltb < 0) {
+			DEBUG("    shp_$Vgtb < 0  [shp_$Vltb=%f]", shp_$Vltb)
+			return (NA)
+		} 
+		
+		a <- shp_$SSwl * shp_$Sl / shp_$Al
+		b <- shp_$SSwg * shp_$Sg / shp_$Ag
+		c <- shp_$SSi * shp_$Si * (1/shp_$Al + 1/shp_$Ag)
+		d <- (fp$densityL - fp$densityG) * g * sin(fp$inclination)
+		DEBUG("    a=%f, b=%f, c=%f, d=%f, ret=%f", a, b, c, d, a-b-c+d)
+		a - b - c + d
+	}
+	
+	hlList <- seq(0.005, fp$De-0.005, length.out=100)
+	retFun <- sapply(hlList, funH)
+	num <- which( !is.na(retFun) )
+	
+	range <- c(hlList[min(num)], fp$De-0.005)
+	
+	TRACE("  - - -")
+	TRACE("* Start finding solution...")
+	TRACE("*   Thickness Range: %f ~ %f (m)", range[1], range[2])
+	
+	f <- uniroot(funH, range, tol=1e-10)
+	
+	DEBUG("  - - - - -")
+	
+	hl <- f$root
+	shp <- dPcalc.slug.H.properties(fp, hl, Hlls, Vgls, Vtb)
+	Lls_Lu <- (Hlu - shp$Hltb) / (Hlls - shp$Hltb)
+	Ltb_Lu <- 1 - Lls_Lu
+	
+	TRACE( dPcalc.slug.H.flowProperties.toString(shp) )
+	
+	INFO("* hl: %f (m),  Lls_Lu: %f,  Ltb_Lu: %f", hl, Lls_Lu, Ltb_Lu)
+	INFO("* Hlls: %f,  Hltb: %f,  Hlu: %f,  ", Hlls, shp$Hltb, Hlu)
+	INFO("- Vmix: %f (m/sec),  Vtb: %f (m/sec)", fp$Vmix, Vtb, Vgls)
+	INFO("- Vgls: %f (m/sec),  Vgtb: %f (m/sec),  Vlls: %f (m/sec),  Vltb: %f (m/sec)", Vgls, shp$Vgtb, shp$Vlls, shp$Vltb)
+	
+	densityU <- Hlu * fp$densityL + (1 - Hlu) * fp$densityG
+	densityLS <- Hlls * fp$densityL + (1 - Hlls) * fp$densityG
+	viscosityLS <- Hlls * fp$viscosityL + (1 - Hlls) * fp$viscosityG
+	
+	INFO("- densityU: %.f (kg/m3),  densityLS: %.1f (kg/m3),  viscosityLS: %f (Pa-s)", densityU, densityLS, viscosityLS)
+	
+	ReLS <- densityLS * fp$Vmix * fp$De / viscosityLS
+	fLS <- dPcalc.fFrictionFactor(ReLS, fp$De)
+	SSls <- fLS * densityLS * fp$Vmix^2 / 2
+	
+	INFO("- ReLS: %.1f,  fLS: %f,  SSls: %.1f (N/m2),  SSwl: %.1f (N/m2)", ReLS, fLS, SSls, shp$SSwl)
+	
+	dP_Ftb <- (shp$SSwl * shp$Sl + shp$SSwg * shp$Sg) / fp$area * Ltb_Lu
+	dP_Fls <- SSls * (fp$De * pi) / fp$area * Lls_Lu
+	
+	dP_H <- densityU * g * sin(fp$inclination)
+	dP_F <- dP_Ftb + dP_Fls
+	dP_A <- 0
+	
+	diffP <- (dP_H + dP_F + dP_A) * dZ
+	
+	INFO("* dP_H: %.1f (Pa/m),  dP_F: %.1f (Pa/m),  dP_A: %.1f (Pa/m)", dP_H, dP_F, dP_A)
+	INFO("* diffP: %.1f (Pa),  dZ: %.1f (m)", diffP, dZ)
+	INFO("END:  dPCalc.slug.H.dP()")
+	
+	list(diffP=diffP, Hl=Hlu,
+			 dP_H=dP_H, dP_F=dP_F, dP_A=dP_A,
+			 dP_Ftb=dP_Ftb, dP_Fls=dP_Fls, sfp=tbp, fun=funH)
+}
+
+
+
+dPcalc.slug.H.properties <- function(fp, hl, Hlls, Vgls, Vtb) {
+	r <- fp$De / 2
+	angle <- acos(1 - hl/r)    # angle (radian)
+	
+	# Perimeter of gas-liquid interface (Chord of circle)
+	Si <- (r^2 - (r-hl)^2)^0.5 * 2
+	
+	# Perimeter of liquid and gas
+	Sl <- r * angle *2
+	Sg <- 2 * pi * r - Sl
+	
+	# Flow area of liquid and gas
+	Al <- r^2 * angle + (hl - r) * Si / 2
+	Ag <- r^2 * pi - Al
+	
+	# Holdup of Taylor bubble section
+	Hltb <- Al / fp$area
+	
+	# Actual velocity of liquid and gas
+	Vlls <- dPcalc.slug.Vlls(fp$Vmix, Hlls, Vgls)
+	Vltb <- dPcalc.slug.Vltb(Hltb, Hlls, Vtb, Vlls)
+	Vgtb <- dPcalc.slug.Vgtb(Hltb, fp$Vmix, Vltb)
+	
+	# Hydraulic diameter - Gomez (21)
+	Dl <- 4 * Al / Sl
+	Dg <- 4 * Ag / (Sg + Si)
+	
+	# Reynolds number - Gomez (22)
+	ReL <- Dl * Vlls * fp$densityL / fp$viscosityL
+	ReG <- Dg * Vgls * fp$densityG / fp$viscosityG
+	
+	# Friction Factor
+	fL <- dPcalc.fFrictionFactor(fp$densityL * fp$Vsl * fp$De / fp$viscosityL, fp$De)  # Superficial liquid friction
+	fG <- dPcalc.fFrictionFactor(fp$densityG * fp$Vsg * fp$De / fp$viscosityG, fp$De)  # Superficial gas friction
+	if (PIPE_ROUGHNESS == 0) {
+		fL <- dPcalc.fFrictionFactor(ReL, Dl, roughness=0)    # Barnea.frictionFactor.TaitelDukler(ReL, fp)
+		fG <- dPcalc.fFrictionFactor(ReG, Dg, roughness=0)    # Barnea.frictionFactor.TaitelDukler(ReG, fp)
+	}
+	fI <- fG     # Taitel & Dukler (1976) suggested that fi = fG
+	
+	# Shear Stress  - Gomez (20) and (25)
+	SSwl <- fL * fp$densityL * Vltb^2 / 2
+	SSwg <- fG * fp$densityG * Vgtb^2 / 2
+	SSi <- fI * fp$densityG * (Vgtb - Vltb) * abs(Vgtb - Vltb) / 2
+	
+	list(Sg=Sg, Sl=Sl, Si=Si, Ag=Ag, Al=Al,
+			 Hltb=Hltb, Vlls=Vlls, Vltb=Vltb, Vgtb=Vgtb,
+			 ReL=ReL, fL=fL, ReG=ReG, fG=fG, fI=fI,
+			 SSwl=SSwl, SSwg=SSwg, SSi=SSi)
+	#,dP_lls=dP_lls, dP_gls=dP_gls)
+}
+
+
+
+flowProperties <- function(P, T, diameter, Qgstd, Ql, ipDiameter=0, inclination=pi/2) {
+	methaneProp <- methaneProperties(P, T)
+	
+	area    <- circularPipeArea(diameter, ipDiameter)
+	#De      <- circularPipeDe(diameter, ipDiameter)
+	De      <- ifelse(ipDiameter==0, diameter, (diameter^2-ipDiameter^2))
+	annulus <- (ipDiameter>0)
+	
+	Z <- methaneProp$Z
+	densityG   <- methaneProp$density
+	densityL   <- waterDensity(P, T)
+	viscosityG <- methaneProp$viscosity
+	viscosityL <- waterViscosity(P, T)
+	surfaceTensionGL <- surfaceTension(P, T)
+	
+	Qg   <- Qgstd2Qg(Qgstd, methaneZstd, P, T, Z)
+	Vsg  <- Qg / area
+	Vsl  <- Ql / area
+	Vmix <- Vsg + Vsl
+	
+	list(
+		P=P, T=T, D=diameter, ID=ipDiameter, annulus=annulus,
+		inclination=inclination, De=De, area=area,
+		Qgstd=Qgstd, Qg=Qg, Ql=Ql, Vsg=Vsg, Vsl=Vsl,
+		densityG=densityG, densityL=densityL, viscosityG=viscosityG, viscosityL=viscosityL,
+		surfaceTensionGL=surfaceTensionGL, Z=Z, Vmix=Vmix
+	)
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+# =============================================================================
+# =============================================================================
 
 
 dPcalc.slug.V.dP <- function(fp, dZ) {
