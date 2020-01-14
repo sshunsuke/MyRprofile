@@ -123,16 +123,92 @@ Gomez$Util <- list()
 Gomez$Slug <- function(vsG, vsL, D, densityG, densityL, viscosityG, viscosityL, surfaceTension, inclination, tol=1e-8) {
 	vmix = vsG + vsL
 	
-	
-	
 	# Taylor-bubble-rise Velocity - Bendiksen (1984) : Gomez (40)
 	vtb = 1.2 * vmix + (0.542 * (g*fp$De)^0.5 * cos(inclination) + 0.351 * (g*fp$De)^0.5 * sin(inclination))
 	
+	# Holdup in liquid slug : Gomez (38), (39)
+	ReLS = (densityL * vmix * D) / viscosityL    # Slug Reynolds number
+	Hlls = exp( -(0.45 * inclination + 2.48*10^(-6) * ReLS) )
+	
+	# Gas velocity in liquid slug - Gomez (57), (58)
+	vbr = 1.53 * ((g * surfaceTension * (densityL - densityG)) / densityL^2) ^ 0.25
+	Vgls = 1.15 * vmix + vbr * sin(inclination) * Hlls^0.5
+	
+	# Holdup in slug unit - Gomez (31)
+	Hlu = (vtb * Hlls + Vgls * (1 - Hlls) - Vsg) / Vtb
+
+	# Liquid level (hl) in Taylor bubble section - Gomez (32)
 	
 	
 	
 
+}
 
+
+Gomez$TaylorBubble <- function(D, hl, Hlls, Vgls, Vtb) {
+	r = D / 2
+	angle = acos(1 - hl/r)    # angle (radian)
+	
+	# Perimeter of gas-liquid interface (Chord of circle)
+	Si <- (r^2 - (r-hl)^2)^0.5 * 2
+	
+	# Perimeter of liquid and gas
+	Sl <- r * angle *2
+	Sg <- 2 * pi * r - Sl
+	
+	# Flow area of liquid and gas
+	Al <- r^2 * angle + (hl - r) * Si / 2
+	Ag <- r^2 * pi - Al
+	
+	# -----
+	
+	# Holdup of Taylor bubble section
+	area = r^2 * pi
+	Hltb <- Al / area
+	
+	# Actual velocity of liquid and gas
+	Vlls <- (Vmix - Vgls * (1 - Hlls)) / Hlls    # Gomez (28)
+	Vltb <- Vtb + (Vlls - Vtb) * Hlls / Hltb     # Gomez (27)
+	Vgtb <- (Vmix - Vltb * Hltb) / (1 - Hltb)    # Gomez (29)
+	
+	# -----
+	
+	# Hydraulic diameter - Gomez (21)
+	Dl <- 4 * Al / Sl
+	Dg <- 4 * Ag / (Sg + Si)
+	
+	# Reynolds number - Gomez (22)
+	ReL <- Dl * Vlls * fp$densityL / fp$viscosityL
+	ReG <- Dg * Vgls * fp$densityG / fp$viscosityG
+	
+	
+	
+	
+	
+	
+	# 
+	fL = FCP$ff.Blasius(ReL)
+	
+	
+	# Friction Factor
+	fL <- dPcalc.fFrictionFactor(fp$densityL * fp$Vsl * fp$De / fp$viscosityL, fp$De)  # Superficial liquid friction
+	fG <- dPcalc.fFrictionFactor(fp$densityG * fp$Vsg * fp$De / fp$viscosityG, fp$De)  # Superficial gas friction
+	if (PIPE_ROUGHNESS == 0) {
+		fL <- dPcalc.fFrictionFactor(ReL, Dl, roughness=0)    # Barnea.frictionFactor.TaitelDukler(ReL, fp)
+		fG <- dPcalc.fFrictionFactor(ReG, Dg, roughness=0)    # Barnea.frictionFactor.TaitelDukler(ReG, fp)
+	}
+	fI <- fG     # Taitel & Dukler (1976) suggested that fi = fG
+	
+	# Shear Stress  - Gomez (20) and (25)
+	SSwl <- fL * fp$densityL * Vltb^2 / 2
+	SSwg <- fG * fp$densityG * Vgtb^2 / 2
+	SSi <- fI * fp$densityG * (Vgtb - Vltb) * abs(Vgtb - Vltb) / 2
+	
+	list(Sg=Sg, Sl=Sl, Si=Si, Ag=Ag, Al=Al, 
+			 #Dg=Dg, Dl=Dl, 
+			 Hltb=Hltb, Vlls=Vlls, Vltb=Vltb, Vgtb=Vgtb,
+			 # ReL=ReL, fL=fL, ReG=ReG, fG=fG, fI=fI,
+			 SSwl=SSwl, SSwg=SSwg, SSi=SSi)
 }
 
 
@@ -328,11 +404,31 @@ flowProperties <- function(P, T, diameter, Qgstd, Ql, ipDiameter=0, inclination=
 }
 
 
+# Gomez (2000)
+# This correlation was confirmed only in case of ReLS < 200000.
+dPcalc.correlation.slugV.Hlls.Gomez <- function(fp) {
+	ReLS <- (fp$densityL * fp$Vmix * fp$De) / fp$viscosityL
+	cat(ReLS)
+	exp( -(0.45 * fp$inclination + 2.48*10^(-6) * ReLS) )
+}
 
 
 
 
+# Gomez (28)
+dPcalc.slug.Vlls <- function(Vmix, Hlls, Vgls) {
+	(Vmix - Vgls * (1 - Hlls)) / Hlls
+}
 
+# Gomez (27)
+dPcalc.slug.Vltb <- function(Hltb, Hlls, Vtb, Vlls) {
+	Vtb + (Vlls - Vtb) * Hlls / Hltb
+}
+
+# Gomez (29)
+dPcalc.slug.Vgtb <- function(Hltb, Vmix, Vltb) {
+	(Vmix - Vltb * Hltb) / (1 - Hltb)
+}
 
 
 
