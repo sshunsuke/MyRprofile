@@ -286,9 +286,30 @@ cum.probability <- function(values, decreasing=FALSE) {
 }
 
 # =============================================================================
+# Root-finding algorithm
 # =============================================================================
-# Bisection Method
 
+# Newton-Raphson method
+newtonRaphson <- function(fun, dFun, fD_0, tol=1e-10, itMax=10) {
+  it <- 0
+  fD_n <- fD_0
+  d <- fun(fD_n) / dFun(fD_n)
+  
+  while (abs(d) >= tol) {
+    it <- it + 1
+    if (it > itMax) {
+      stop("Calculation did not converge.")
+    }
+    
+    d <- fun(fD_n) / dFun(fD_n)
+    fD_n <- fD_n - d
+  }
+  
+  fD_n
+}
+
+
+# Bisection Method
 bisection <- function(f, rangeFrom, rangeTo, itMax = 100, tol = 1e-7) {
   # Check arguments.
   if (rangeFrom >= rangeTo) {
