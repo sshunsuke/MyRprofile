@@ -1,4 +1,6 @@
-# Nomenclatures for properties:
+# Comment Stype: https://ourcodingclub.github.io/tutorials/etiquette/
+
+# Nomenclatures for properties: ----
 #
 # fD: Darcy friction factor
 # g: gravity Acceleration [m/s2]
@@ -18,9 +20,9 @@
 
 
 
-# =============================================================================
-# Constant values
-# =============================================================================
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# Constant values ----
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
 g <- 9.8                      # Gravity Acceleration (m/s2)
 R <- 8.3144621                # Gas Constant (J/K-mol)
@@ -41,9 +43,9 @@ Pntp <- 101325    # (Pa)
 Tntp <- 293.15    # (K)
 
 
-# =============================================================================
-# Greatest Common Divisor & Least Common Multiple
-# =============================================================================
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# Greatest Common Divisor & Least Common Multiple ----
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 gcd <- (function(){
   gcd_ <- function(a, b){
     while(a %% b != 0){
@@ -65,9 +67,9 @@ lcm <- (function(){
 
 
 
-# =============================================================================
-# Unit Conversion
-# =============================================================================
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# Unit Conversion ----
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 if (exists('inch2m') == TRUE) { detach(UC) }
 
 UC <- list(
@@ -113,7 +115,7 @@ if (exists('inch2m') == FALSE) { attach(UC) }
 
 
 # =============================================================================
-# Properties of simple shapes.
+# Properties of simple shapes. ----
 # =============================================================================
 circle <- list(
   area = function(r) { r * r * pi },
@@ -134,7 +136,7 @@ SMD <- function(vD) { sum(vD^3) / sum(vD^2) }
 
 
 # =============================================================================
-# Dimensionless Number
+# Dimensionless Number ----
 # =============================================================================
 if (exists('Reynolds') == TRUE) { detach(DN) }
 
@@ -172,11 +174,10 @@ DN <- (function(){
 
     
     
-    
-    # -------------------------------------------------------------------------
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # Ratios between diffusions of momentum, heat or mass
-    # -------------------------------------------------------------------------
-    
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
     # Pr := momentum / heat
     #   specificHeat: J/Kg-K, viscosity: N-s/m2, thermal conductivity: W/m-K
     Prandtl = function(specificHeat, viscosity, thermalConductivity) {
@@ -194,9 +195,9 @@ DN <- (function(){
     },
     
     
-    # -------------------------------------------------------------------------
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # Ratio of different forces
-    # -------------------------------------------------------------------------
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     
     # Fr
     Froude = function(v, L) {
@@ -229,7 +230,7 @@ DN <- (function(){
 if (exists('Reynolds') == FALSE) { attach(DN) }
 
 # =============================================================================
-# IO clipboard
+# IO clipboard ----
 # =============================================================================
 rcbmat <- function(header, ...) {
   if (missing(header)) { header = FALSE }
@@ -244,7 +245,7 @@ wcbmat <- function(data, header, sep="\t", row.names=FALSE, qmethod="double",
 }
 
 # =============================================================================
-# Vector
+# Vector ----
 # =============================================================================
 v.indexClosestValue <- function(vec, x) {
 	diff <- abs(vec-x)
@@ -258,13 +259,13 @@ v.closestValue <- function(vec, x) {
 
 
 # =============================================================================
-# Matrix
+# Matrix ----
 # =============================================================================
 m.crev <- function(mat) { mat[,ncol(mat):1] }
 m.rrev <- function(mat) { mat[nrow(mat):1,] }
 
 # =============================================================================
-# Data Frame
+# Data Frame ----
 # =============================================================================
 df.orderBy <- function(df, colname, decreasing=FALSE) {
   if (missing(colname)) { stop("'colname' is not specified.") }
@@ -273,7 +274,7 @@ df.orderBy <- function(df, colname, decreasing=FALSE) {
 
 
 # =============================================================================
-# Probability
+# Probability ----
 # =============================================================================
 # Create a matrix of information of cumulative distribution.
 # 
@@ -286,7 +287,7 @@ cum.probability <- function(values, decreasing=FALSE) {
 }
 
 # =============================================================================
-# Root-finding algorithm
+# Root-finding algorithm ----
 # =============================================================================
 
 # Newton-Raphson method
@@ -351,7 +352,7 @@ bisection <- function(f, rangeFrom, rangeTo, itMax = 100, tol = 1e-7) {
 
 
 # =============================================================================
-# Functions for debug log.
+# Functions for debug log. ----
 # =============================================================================
 DEBUG_LOG <- (function() {
   FILE        <- "log/rlog.txt"
@@ -453,7 +454,7 @@ CAT <- function(..., i=0) {
 
 
 # =============================================================================
-# Flow in a circular pipe.
+# Flow in a circular pipe. ----
 # =============================================================================
 
 FCP <- (function(){
@@ -561,7 +562,7 @@ FCP <- (function(){
 
 
 # =============================================================================
-# Heat Exchanger
+# Heat Exchanger ----
 # =============================================================================
 
 # LMTD (logarithmic mean temperature difference)
