@@ -452,6 +452,28 @@ CAT <- function(..., i=0) {
 }
 
 
+# _____________________________________________________________________________
+
+# ---- Utility functions for plots ----
+
+UP <- (function(){
+  eb <- function(x0, y0, x1, y1, col, length) {
+    arrows(x0, y0, x1, y1, angle=90, code=3, length=length, col=col)
+  }
+  
+  list(errorBar = eb, 
+       errorBarX = function(x, y, err, col, length=0.1) {
+         errorBar(x-err, y, x+err, y, col, length)
+       },
+       errorBarY = function(x, y, err, col, length=0.1) {
+         errorBar(x, y-err, x, y+err, col, length)
+       }
+  )
+})()
+
+
+
+
 
 # =============================================================================
 # Flow in a circular pipe. ----
