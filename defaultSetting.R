@@ -20,27 +20,105 @@
 
 
 
-# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-# Constant values ----
-# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# Utilities
 
-g <- 9.8                      # Gravity Acceleration (m/s2)
-R <- 8.3144621                # Gas Constant (J/K-mol)
-# R <- 8.314471               # Moldover et al. (1988)
-# Na <- 6.022140857 * 10^23     # Avogadro constant
-kB <- 1.38064852 * 10^(-23)   # Boltzmann constant (J/K)
+if (exists('SMD') == TRUE) { detach(UTIL) }
 
-# STP (Standard Temperature and Pressure) - old 
-Pstp <- 100000    # (Pa)
-Tstp <- 273.15    # (K)
+UTIL <- list(
+  
+  # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+  # Constant values ----
+  # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+  
+  g = 9.8,                      # Gravity Acceleration (m/s2)
+  R = 8.3144621,                # Gas Constant (J/K-mol)
+  # R <- 8.314471               # Moldover et al. (1988)
+  
+  # Na <- 6.022140857 * 10^23     # Avogadro constant
+  kB = 1.38064852 * 10^(-23),   # Boltzmann constant (J/K)
+  
+  # STP (Standard Temperature and Pressure) - old 
+  Pstp = 100000,    # (Pa)
+  Tstp = 273.15,    # (K)
+  
+  # SATP (Standard Ambient Temperature and Pressure)
+  Psatp = 101325,    # (Pa)
+  Tsatp = 298.15,    # (K)
+  
+  # NTP (Normal Temperature and Pressure)
+  Pntp = 101325,     # (Pa)
+  Tntp = 293.15,     # (K)
+  
+  
+  # =============================================================================
+  # Properties of simple shapes. ----
+  # =============================================================================
+  
+  circle = list(
+    area = function(r) { r * r * pi },
+    circumference = function(r) { 2 * r * pi }
+  ),
+  
+  sphere = list(
+    volume      = function(r) { (4 * pi * r^3) / 3 },
+    surfaceArea = function(r) { 4 * pi * r^2 }
+  ),
+  
+  elipsoid = list(
+    volume      = function(a,b,c) { 4/3 * pi * a * b * c }
+  ),
+  
+  # Sauter Mean Diameter (vD: Vector of diameters)
+  SMD = function(vD) { sum(vD^3) / sum(vD^2) },
+  
+  
+  # =============================================================================
+  # IO clipboard ----
+  # =============================================================================
+  rcbmat = function(header, ...) {
+    if (missing(header)) { header = FALSE }
+    utils::read.table(file="clipboard", header=header, ...)
+  },
+  
+  wcbmat = function(data, header, sep="\t", row.names=FALSE, qmethod="double",
+                    col.names=ifelse(header && row.names, NA, header), ...) {
+    if (missing(header)) { header = FALSE }
+    utils::write.table(data, file="clipboard-128", sep=sep, row.names=row.names,
+                       col.names=col.names, qmethod=qmethod, ...)
+  },
+  
+  
+  # =============================================================================
+  # Vector ----
+  # =============================================================================
+  v.indexClosestValue = function(vec, x) {
+    diff <- abs(vec-x)
+    which( diff == min(diff) )
+  },
+  
+  v.closestValue = function(vec, x) {
+    vec[ v.indexClosestValue(vec, x) ]
+  },
+  
+  
+  # =============================================================================
+  # Matrix ----
+  # =============================================================================
+  m.crev = function(mat) { mat[,ncol(mat):1] },
+  m.rrev = function(mat) { mat[nrow(mat):1,] },
+  
+  
+  # =============================================================================
+  # Data Frame ----
+  # =============================================================================
+  df.orderBy = function(df, colname, decreasing=FALSE) {
+    if (missing(colname)) { stop("'colname' is not specified.") }
+    df[order(df[,colname], decreasing=decreasing),]
+  }
+)
 
-# SATP (Standard Ambient Temperature and Pressure)
-Psatp <- 101325    # (Pa)
-Tsatp <- 298.15    # (K)
 
-# NTP (Normal Temperature and Pressure)
-Pntp <- 101325    # (Pa)
-Tntp <- 293.15    # (K)
+if (exists('SMD') == FALSE) { attach(UTIL) }
 
 
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
@@ -114,25 +192,7 @@ UC <- list(
 if (exists('inch2m') == FALSE) { attach(UC) }
 
 
-# =============================================================================
-# Properties of simple shapes. ----
-# =============================================================================
-circle <- list(
-  area = function(r) { r * r * pi },
-  circumference = function(r) { 2 * r * pi }
-)
 
-sphere <- list(
-  volume      = function(r) { (4 * pi * r^3) / 3 },
-  surfaceArea = function(r) { 4 * pi * r^2 }
-)
-
-elipsoid <- list(
-  volume      = function(a,b,c) { 4/3 * pi * a * b * c }
-)
-
-# Sauter Mean Diameter (vD: Vector of diameters)
-SMD <- function(vD) { sum(vD^3) / sum(vD^2) }
 
 
 # =============================================================================
@@ -229,48 +289,7 @@ DN <- (function(){
 
 if (exists('Reynolds') == FALSE) { attach(DN) }
 
-# =============================================================================
-# IO clipboard ----
-# =============================================================================
-rcbmat <- function(header, ...) {
-  if (missing(header)) { header = FALSE }
-  utils::read.table(file="clipboard", header=header, ...)
-}
 
-wcbmat <- function(data, header, sep="\t", row.names=FALSE, qmethod="double",
-                   col.names=ifelse(header && row.names, NA, header), ...) {
-  if (missing(header)) { header = FALSE }
-  utils::write.table(data, file="clipboard-128", sep=sep, row.names=row.names,
-                     col.names=col.names, qmethod=qmethod, ...)
-}
-
-# =============================================================================
-# Vector ----
-# =============================================================================
-v.indexClosestValue <- function(vec, x) {
-	diff <- abs(vec-x)
-	which( diff == min(diff) )
-}
-
-v.closestValue <- function(vec, x) {
-	vec[ v.indexClosestValue(vec, x) ]
-}
-
-
-
-# =============================================================================
-# Matrix ----
-# =============================================================================
-m.crev <- function(mat) { mat[,ncol(mat):1] }
-m.rrev <- function(mat) { mat[nrow(mat):1,] }
-
-# =============================================================================
-# Data Frame ----
-# =============================================================================
-df.orderBy <- function(df, colname, decreasing=FALSE) {
-  if (missing(colname)) { stop("'colname' is not specified.") }
-  df[order(df[,colname], decreasing=decreasing),]
-}
 
 
 # =============================================================================
@@ -512,7 +531,7 @@ FCP <- (function(){
     
     # Darcy-Weisbach equation (for the calculation of dP per unit length)
     DarcyWeisbach = function(fD, density, velocity, D) {
-      fd * density * (velocity ^ 2) / (2 * D)
+      fD * density * (velocity ^ 2) / (2 * D)
     },
     
     WallShearStress = function(D, dp_dL) {

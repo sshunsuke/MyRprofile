@@ -3,10 +3,6 @@ title: "Usage of defaultSetting.R"
 author: "Shunsuke"
 date: '`r format(Sys.time(), "%y/%m/%d %H:%M")`'
 output:
-  pdf_document:
-    highlight: tango
-    latex_engine: lualatex
-    number_section: yes
   html_document:
     code_folding: hide
     highlight: zenburn
@@ -16,6 +12,10 @@ output:
     toc_float:
       collapsed: no
       smooth_scroll: no
+  pdf_document:
+    highlight: tango
+    latex_engine: lualatex
+    number_section: yes
 header-includes: \setmainfont{Arial}
 ---
 

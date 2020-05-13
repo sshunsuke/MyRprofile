@@ -1,5 +1,5 @@
 ---
-title: "Tips - Data"
+title: "Tips - Vector"
 author: "Shunsuke"
 date: "2019年6月9日"
 output: 
@@ -17,9 +17,7 @@ output:
 knitr::opts_chunk$set(echo = TRUE, collapse=TRUE, prompt=TRUE)
 ```
 
-# Vector
-
-## What is vector in R?
+# What is vector in R?
 
 > Vector is a basic data structure in R. It contains element of the same type. The data types can be logical, integer, double, character, complex or raw.
 >
@@ -47,24 +45,24 @@ c(TRUE, FALSE) * 10
 ```
 
 
-## Create vector
+----
 
-### Functions & syntax sugar
+# Functions & syntax sugar
+
+## Create a vector
 
 * c()
 * seq()
 * rep()
 * 1:10
 
-### Examples
-
-; the simplest way to create vecor
+**The simplest way to a create vector**
 
 ```{r, collapse=TRUE}
 c(-4 , TRUE, "a", FALSE, 5, "bbbb")
 ```
 
-; create vector consisting of numbers. 
+**Create vectors consisting of numbers. **
 
 ```{r}
 1:10*3 + 1
@@ -75,8 +73,77 @@ rep(1:3, each=3)         # repeat each element of c(1,2,3)
 ```
 
 
+## Access to properties 
+
+* length()
+* typeof()
+* names()
+
+**Get type or length**
+
+```{r, collapse=TRUE}
+# Get the length of a vector
+length(1:4)
+
+# Get the type of elements
+typeof(3:5)
+typeof(c(TRUE, FALSE))
+typeof(c("a", "bb", 3, TRUE))
+```
+
+
+**Access to labels**
+
+```{r, collapse=TRUE}
+v <- c(3, 5, 8)
+names(v) <- c("x", "y", "z")  # set labels
+names(v)                      # get labels
+v[ c("x","z") ]
+```
+
+## Get elements
+
+* x[]
+* tail()
+
+**specify indexes**
+
+```{r}
+x <- c(10, 20, 30, 40, 50, 60)
+
+# Specify required elements
+x[3:5]                                   # use a logical vector as index
+x[3:length(x)]
+x[c(1,3,4)]
+x[c(TRUE,FALSE,TRUE,FALSE,FALSE,FALSE)]  # use a logical vector as index
+x[x %% 3 == 0]                           # specify conditions
+
+# Use tail() function
+tail(x, 2)            # 50 60   (指定した数の要素を末尾から)
+
+# Specify excluded elements
+x[-1]
+x[-2:-4]
+x[c(-2,-5)]
+```
+
+
+## Get indexes satisfing given conditions
+
+* which()
+
+```{r}
+which(x > 20)         # indexを取得したい時
+```
+
+
+## Concatenate
 
 
 
 
+
+# Utilities
+
+* cumsum()
 
