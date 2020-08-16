@@ -80,10 +80,16 @@ UTIL <- list(
     utils::read.table(file="clipboard", header=header, ...)
   },
   
-  wcbmat = function(data, header, sep="\t", row.names=FALSE, qmethod="double",
+  wcbmat = function(data, header, sep="\t", size=128, row.names=FALSE, qmethod="double",
                     col.names=ifelse(header && row.names, NA, header), ...) {
     if (missing(header)) { header = FALSE }
-    utils::write.table(data, file="clipboard-128", sep=sep, row.names=row.names,
+    
+    if (typeof(size) != "double" && typeof(size) != "integer") {
+      stop("type of 'size' must be 'double' or 'integer'.")
+    }
+    fn = sprintf("clipboard-%d", size)
+    
+    utils::write.table(data, file=fn, sep=sep, row.names=row.names,
                        col.names=col.names, qmethod=qmethod, ...)
   },
   
