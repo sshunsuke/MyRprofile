@@ -522,10 +522,18 @@ FCP <- (function(){
       fD_n <- FCP$fD.Blasius(Re)
       d <- fun(fD_n) / dFun(fD_n)
       
+      maxIter <- 10
+      counter <- 1
+      
       # Newton-Raphson method
       while (abs(d) >= tol) {
         d <- fun(fD_n) / dFun(fD_n)
         fD_n <- fD_n - d
+        
+        if (counter >= maxIter) {
+          stop("solution was not found.")
+        }
+        counter <- counter + 1
       }
       
       fD_n
