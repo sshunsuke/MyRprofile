@@ -49,20 +49,22 @@ c(TRUE, FALSE) * 10
 
 # Functions & syntax sugar
 
-## Create a vector
+## Create a vector {.tabset}
 
 * c()
 * seq()
 * rep()
 * 1:10
 
-**The simplest way to a create vector**
+**Examples**
+
+### Simplest way
 
 ```{r, collapse=TRUE}
 c(-4 , TRUE, "a", FALSE, 5, "bbbb")
 ```
 
-**Create vectors consisting of numbers. **
+### Useful functions
 
 ```{r}
 1:10*3 + 1
@@ -73,13 +75,15 @@ rep(1:3, each=3)         # repeat each element of c(1,2,3)
 ```
 
 
-## Access to properties 
+## Access to properties {.tabset}
 
 * length()
 * typeof()
 * names()
 
-**Get type or length**
+**Examples**
+
+### Get length or type
 
 ```{r, collapse=TRUE}
 # Get the length of a vector
@@ -92,7 +96,7 @@ typeof(c("a", "bb", 3, TRUE))
 ```
 
 
-**Access to labels**
+### Access to labels
 
 ```{r, collapse=TRUE}
 v <- c(3, 5, 8)
