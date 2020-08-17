@@ -1,7 +1,7 @@
 ---
 title: "Tips - Vector"
 author: "Shunsuke"
-date: "2019年6月9日"
+date: '`r format(Sys.time(), "%y/%m/%d %H:%M")`'
 output: 
   html_document:
     toc: true
@@ -19,7 +19,7 @@ knitr::opts_chunk$set(echo = TRUE, collapse=TRUE, prompt=TRUE)
 
 # What is vector in R?
 
-> Vector is a basic data structure in R. It contains element of the same type. The data types can be logical, integer, double, character, complex or raw.
+> Vector is a basic data structure in R. It contains element of the same type. The data types can be **logical, integer, double, character, complex or raw**.
 >
 > A vector’s type can be checked with the typeof() function.
 >
@@ -51,23 +51,25 @@ c(TRUE, FALSE) * 10
 
 ## Create a vector {.tabset}
 
+**List of functions**
+
 * c()
+* 1:10
 * seq()
 * rep()
-* 1:10
 
 **Examples**
 
-### Simplest way
+### Simplest ways
 
 ```{r, collapse=TRUE}
 c(-4 , TRUE, "a", FALSE, 5, "bbbb")
+1:10*3 + 1
 ```
 
 ### Useful functions
 
 ```{r}
-1:10*3 + 1
 seq(1, 20, by=5)         # 等差数列   1 6 11 16
 seq(1,5, length.out=9)   # devide the range from 1 to 5 by N-1 (N=9 in this case). 
 rep(1:3, times=3)        # repeat c(1,2,3) three times
@@ -105,30 +107,42 @@ names(v)                      # get labels
 v[ c("x","z") ]
 ```
 
-## Get elements
+## Get elements {.tabset}
 
 * x[]
 * tail()
 
-**specify indexes**
+**Examples**
 
 ```{r}
+# Prepare a vector.
 x <- c(10, 20, 30, 40, 50, 60)
+```
 
-# Specify required elements
+### Included elements
+
+```{r}
+# Specify included elements. 
 x[3:5]                                   # use a logical vector as index
 x[3:length(x)]
 x[c(1,3,4)]
 x[c(TRUE,FALSE,TRUE,FALSE,FALSE,FALSE)]  # use a logical vector as index
 x[x %% 3 == 0]                           # specify conditions
+```
 
-# Use tail() function
-tail(x, 2)            # 50 60   (指定した数の要素を末尾から)
+### Excluded elements
 
+```{r}
 # Specify excluded elements
 x[-1]
 x[-2:-4]
 x[c(-2,-5)]
+```
+
+### tail() function
+
+```{r}
+tail(x, 2)            # 50 60   (指定した数の要素を末尾から)
 ```
 
 
@@ -140,14 +154,85 @@ x[c(-2,-5)]
 which(x > 20)         # indexを取得したい時
 ```
 
+## Edit vectors {.tabset}
 
-## Concatenate
+* c()
+* append()
+* replace()
+* rev()
+* sort()
 
+**Examples**
 
+### Concatenate
 
+```{r}
+x1 <- c(1, 2)
+x2 <- c(30, 40, 50)
+n <- 600
+c(x1, x2, n, 7000)
+append(x1, x2)            # (単純に連結)
+append(x1, x2, after=1)   # (ベクトルの途中に値を挿入)
+```
 
+### Change values
+
+```{r}
+z <- c(10, 20, 30, 40, 50, 60)
+replace( z, 2:4, 0 )
+replace( z, 2:4, c(2,3,4) )
+replace( z, 1:4, c(11,22) )
+replace( z, z<50, c(11, 12, 13, 14) )
+```
+
+### Change order
+
+```{r}
+# reverse
+rev( c(10, 20, 30) )
+# sort
+sort( c(3,5,2,1,4) )
+sort( c(3,5,2,1,4), decreasing=TRUE )
+```
+
+## Manipulate types of vector
+
+* is.logical(), as.logical()
+* is.numeric(), as.numeric()
+* is.double(), as.double()
+* is.character(), as.character()
+
+----
 
 # Utilities
 
-* cumsum()
+* mean()
+* median()
+* max(), cummax()
+* min(), cummin()
+* sum(), cumsum()
+* prod(), cumprod()
+
+## Statistical Properties {.tabset}
+
+```{r}
+X <- c(1,1,2,3,3,3,4,5,7,0)
+mean(X)
+median(X)
+max(X)
+min(X)
+# A function for mode is not prepared
+sum(X)
+prod(X)
+# Cumulative properties
+cummax(X)
+cummin(X)
+cumsum(X)
+cumprod(X)
+```
+
+
+## High-order functions
+
+* sapply()
 
