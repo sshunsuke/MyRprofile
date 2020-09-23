@@ -146,9 +146,13 @@ tail(x, 2)            # 50 60   (指定した数の要素を末尾から)
 ```
 
 
-## Get indexes satisfing given conditions
+## Get indexes
+
+Function to get indexes satisfing given conditions:
 
 * which()
+
+**Examples**
 
 ```{r}
 which(x > 20)         # indexを取得したい時
@@ -161,6 +165,7 @@ which(x > 20)         # indexを取得したい時
 * replace()
 * rev()
 * sort()
+* unique()
 
 **Examples**
 
@@ -195,16 +200,50 @@ sort( c(3,5,2,1,4) )
 sort( c(3,5,2,1,4), decreasing=TRUE )
 ```
 
+<<<<<<< HEAD
+### Remove duplicate elements
+
+```{r}
+unique( c(10:5, 6:17))
+```
+
+
 ## Manipulate types of vector
+=======
+## Edit vectors (destructive) {.tabset}
+
+```{r}
+z <- c(10, 20, 30, 40, 50, 60)
+z[2:4] <- 0 ; z
+z[2:4] <- c(2,3,4) ; z
+z[1:4] <- c(1,2); z
+z[z<50] <- c(11, 12, 13, 14) ; z
+```
+
+
+## Manipulate types of elements of vector
+
+**Basic types**
+>>>>>>> 9a58438329362772ea663ec09e1babeaaf50f403
 
 * is.logical(), as.logical()
 * is.numeric(), as.numeric()
 * is.double(), as.double()
 * is.character(), as.character()
 
+**null-able**
+
+* is.null()
+* is.na()
+* is.nan()
+* is.finite()
+* is.infinite()
+
 ----
 
 # Utilities
+
+## Statistical Properties {.tabset}
 
 * mean()
 * median()
@@ -213,17 +252,32 @@ sort( c(3,5,2,1,4), decreasing=TRUE )
 * sum(), cumsum()
 * prod(), cumprod()
 
-## Statistical Properties {.tabset}
+A function for 'mode' is not prepared.
+
+**Examples**
 
 ```{r}
 X <- c(1,1,2,3,3,3,4,5,7,0)
+```
+
+### Return scalar
+
+```{r}
+sum(X)
+prod(X)
 mean(X)
 median(X)
 max(X)
 min(X)
-# A function for mode is not prepared
-sum(X)
-prod(X)
+# Variance (the denominator 'n-1' is used)
+var(X)
+# Standard deviation (the denominator 'n-1' is used)
+sd(X)
+```
+
+### Return vector
+
+```{r}
 # Cumulative properties
 cummax(X)
 cummin(X)
@@ -234,5 +288,13 @@ cumprod(X)
 
 ## High-order functions
 
-* sapply()
+* lapply(X, FUN, )
+* sapply(X, FUN, simplify = TRUE, USE.NAMES = TRUE)
+
+```{r}
+sapply(1:10, function(x) {x * 2})
+sapply(1:10, function(x) {1:x})
+lapply(1:10, function(x) {x * 2})  # return vector (or matrix/array) if possible.  
+lapply(1:10, function(x) {1:x})    # return list if impossible.
+```
 
