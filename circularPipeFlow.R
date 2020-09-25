@@ -1,6 +1,11 @@
 source("defaultSetting.R")
 
-# =============================================================================
+
+
+
+# *****************************************************************************
+# ** MukherjeeBrill ** ----
+# 
 # Mukherjee & Brill method to predict pressure drop and flow regime in inclined
 # two-Phase flow.
 #
@@ -10,35 +15,38 @@ source("defaultSetting.R")
 # 
 #   Mukherjee, H., Brill, J.P., 1985. Pressure drop correlations for inclined
 #   two-phase flow. J. Energy Resour. Technol. Trans. ASME 107, 549–554.
-# =============================================================================
+# *****************************************************************************
 
 # 
 # densityMixS: mixture density with a consideration of slip
 
 MukherjeeBrill <- list()
 
-# DLNs
-# flow regime
-# holdup
-# dPdL
-
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Facade of MukherjeeBrill, which calls four main functions. 
+#   - calculateDLNs()
+#   - flow regime
+#   - holdup
+#   - dPdL
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 MukherjeeBrill$calculate <- function(vsG, vsL, D, densityG, densityL, viscosityG, viscosityL, surfaceTension, angle) {
 	DLNs <- MukherjeeBrill$calculateDLNs(vsG, vsL, D, densityG, densityL, viscosityG, viscosityL, surfaceTension, angle)
 	flowRegime <- MukherjeeBrill$checkFlowRegime(DLNs)
 	holdup <- MukherjeeBrill$holdup(DLNs, flowRegime)
 	dPdL <- MukherjeeBrill$dPdL(DLNs, flowRegime, holdup)
 	
+	list("DLNs"=DLNs, "flowRegime"=flowRegime, "holdup"=holdup, "dPdL"=dPdL)
 }
 
 
 
-# -----------------------------------------------------------------------------
-# Calculate the dimensionless groups proposed by Duns & Ros. 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Calculate the dimensionless groups proposed by Duns & Ros. ----
 #
 # Note:
 #   densityG and viscosityG are not used in this function, but these are 
 #   required to calculate dPdL. 
-# -----------------------------------------------------------------------------
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 MukherjeeBrill$calculateDLNs = function(vsG, vsL, D, densityG, densityL, viscosityG, viscosityL, surfaceTension, angle) {
 	NLv <- vsL * (densityL / g / surfaceTension)^(0.25)
 	NGv <- vsG * (densityL / g / surfaceTension)^(0.25)
@@ -85,14 +93,14 @@ MukherjeeBrill$calculateDLNs = function(vsG, vsL, D, densityG, densityL, viscosi
 }
 
 
-# -----------------------------------------------------------------------------
-# Determine flow regime (Fig 4.19).
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Determine flow regime (Fig 4.19). ----
 # There are four flow regime types are defined in this function. 
 #   1: Stratified
 #   2: Annular
 #   3: Slug
 #   4: Bubbly
-# -----------------------------------------------------------------------------
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 MukherjeeBrill$checkFlowRegime <- function(DLNs) {
   mapply(MukherjeeBrill$checkFlowRegimeCore,
          DLNs$NGv, DLNs$NLv, DLNs$angle, DLNs$NGvSM, DLNs$NGvBS, DLNs$NLvBS_up, DLNs$NLvST)
@@ -140,9 +148,9 @@ MukherjeeBrill$checkFlowRegimeCore <- function(NGv, NLv, angle, NGvSM, NGvBS, NL
 }
 
 
-# -----------------------------------------------------------------------------
-# Estimate liquid holdup.
-# -----------------------------------------------------------------------------
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Estimate liquid holdup. ----
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 MukherjeeBrill$holdup <- function(DLNs, flowRegime) {
 	co <- as.matrix( MukherjeeBrill$selectCoefficients(DLNs, flowRegime) )
@@ -169,9 +177,9 @@ colnames(MukherjeeBrill$coefficients) <- c("Up", "DownStratified", "DownOther")
 rownames(MukherjeeBrill$coefficients) <- paste("C", 1:6, sep="")
 	
 
-# -----------------------------------------------------------------------------
-# dPdL
-# -----------------------------------------------------------------------------
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# dPdL ----
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 # Usage: MukherjeeBrill$ffRatio(HR)
 MukherjeeBrill$ffRatio <- (function(){
@@ -283,17 +291,56 @@ MukherjeeBrill$dPdLSlugBubble <- function(){
 }
 
 
+# ****************************** ----
+# Examples of using MukherjeeBrill. ----
+
+runExampleMukherjeeBrill <- function() {
+	# show the coefficients.
+	print(MukherjeeBrill$coefficients)
+	
+	# Example 3.2
+	#   d = 6", vsG = 3.86 ft/sec, vsL = 3.97 ft/sec
+	d <- inch2m(6)
+	vsG <- ft2m(3.86)
+	vsL <- ft2m(3.97)
+	
+	# Example 4.1
+	#   densityG = 5.88 lbm/ft3, densityL = 47.61 lbm/ft3
+	ratio <- lbm2kg(1) / (ft2m(1)^3)
+	densityG <- 5.88*ratio
+	densityL <- 47.61*ratio
+	
+	# Example 4.8
+	#   viscosityG = 0.016 cp, viscosityL = 0.97 cp, surfaceTension = 8.41 dynes/cm, angle = 90 deg
+	#     -> NLv = 11.87, NGvSM = 350.8, NLvBS_up = 18.40, (Slug flow), HL = 0.560, dPdL = 0.209 psi/ft (= 4727 Pa/m)
+	viscosityG <- UC$cP2Pas(0.016)
+	viscosityL <- UC$cP2Pas(0.97)
+	surfaceTension <- UC$dynpcm2Npm(8.41)
+	angle <- pi/2
+	
+	examMB <- MukherjeeBrill$calculateDLNs(vsG, vsL, d, densityG, densityL, viscosityG, viscosityL, surfaceTension, angle)
+	fr <- MukherjeeBrill$checkFlowRegime(examMB)
+	hol <- MukherjeeBrill$holdup(examMB, fr)
+	dPdL <- MukherjeeBrill$dPdL(examMB, fr, hol)
+	
+	#MukherjeeBrill$dPdL(examMB, fr, hol, 100*1000)        # p = 100 kPa
+	#MukherjeeBrill$dPdL(examMB, fr, hol, 10*1000*1000)    # p = 10 MPa
+	
+	isAnnularMist = function(DLNs) { DLNs$NGv > DLNs$NGvSM }
+	isAnnularMist(examMB)
+	
+	print(examMB)
+	print(fr)
+	print(hol)
+	print(dPdL)
+	
+	# inputs: vsG, vsL, D, densityG, densityL, viscosityG, viscosityL, surfaceTension, angle
+	MukherjeeBrill$calculate(vsG, vsL, d, densityG, densityL, viscosityG, viscosityL, surfaceTension, angle)
+}
 
 
 
-# =============================================================================
 
-# =============================================================================
-
-
-isAnnularMist = function(DLNs) { DLNs$NGv > DLNs$NGvSM }
-
-MukherjeeBrill$coefficients
 
 
 # vsL, vsG, D, densityL, surfaceTension, viscosityL, angle
@@ -301,20 +348,7 @@ MukherjeeBrill$coefficients
 # angle (rad)
 
 
-# Example 3.2
-#   d = 6", vsG = 3.86 ft/sec, vsL = 3.97 ft/sec
-# Example 4.1
-#   densityG = 5.88 lbm/ft3, densityL = 47.61 lbm/ft3, 
-# Example 4.8
-#   viscosityG = 0.016 cp, viscosityL = 0.97 cp, surfaceTension = 8.41 dynes/cm, angle = 90 deg
-#     -> NLv = 11.87, NGvSM = 350.8, NLvBS_up = 18.40, (Slug flow), HL = 0.560, dPdL = 0.209 psi/ft (= 4727 Pa/m)
-ratio <- lbm2kg(1) / (ft2m(1)^3)
-examMB <- MukherjeeBrill$calculateDLNs(ft2m(3.86), ft2m(3.97), inch2m(6), 5.88*ratio, 47.61*ratio, UC$cP2Pas(0.016), UC$cP2Pas(0.97), UC$dynpcm2Npm(8.41), pi/2)
-fr <- MukherjeeBrill$checkFlowRegime(examMB)
-hol <- MukherjeeBrill$holdup(examMB, fr)
-MukherjeeBrill$dPdL(examMB, fr, hol)
-MukherjeeBrill$dPdL(examMB, fr, hol, 100*1000)        # p = 100 kPa
-MukherjeeBrill$dPdL(examMB, fr, hol, 10*1000*1000)    # p = 10 MPa
+
 
 
 exam2 <- MukherjeeBrill$calculateDLNs(ft2m(c(3.86, 3.86, 0.1)), ft2m(3.97), inch2m(6), 5.88*ratio, 47.61*ratio,
@@ -323,15 +357,6 @@ fr2 <- MukherjeeBrill$checkFlowRegime(exam2)
 MukherjeeBrill$selectCoefficients(exam2, fr2)
 hol2 <-MukherjeeBrill$holdup(exam2, fr2)
 MukherjeeBrill$dPdL(exam2, fr2, hol2)
-
-
-
-
-
-
-
-
-
 
 
 
@@ -356,9 +381,6 @@ if (FALSE) {
 	NL = viscosityL * (g / densityL / surfaceTension^3)^(0.25)
 	
 	
-	
-	
-	
 	x = log10(NGv) + 0.940 + 0.074 * sin(angle) - 0.855 * sin(angle)^2 + 3.695 * NL
 	
 	NL
@@ -378,9 +400,8 @@ if (FALSE) {
 
 
 
+# ****************************** ----
 
-
-# =============================================================================
 
 xyTableFromFunction <- function(fun, x, ...) {
 	y <- fun(x, ...)
@@ -396,14 +417,12 @@ hydraulicDiameter <- function(A, S) {
 
 
 
-# =============================================================================
-# Drift Flux Model.
+# Drift Flux Model. ----
 #
 #   1. vmix = vsg + vsl
 #   2. vg = C0 * vmix + vd
 #   3. voidRatio = vsg / vg
 #
-# =============================================================================
 
 cpf.driftFluxModel <- function(C0, Vd, vsg, vsl) {
   vmix <- vsg + vsl
@@ -533,3 +552,6 @@ plot(f, to=1000)
 
 xyTableFromFunction(f, 1:100*10)
 
+
+
+# -----------------------------------------------------------------------------
