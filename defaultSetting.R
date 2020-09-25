@@ -1,6 +1,6 @@
 # Comment Stype: https://ourcodingclub.github.io/tutorials/etiquette/
 
-# Nomenclatures for properties: ----
+# Nomenclatures for properties:
 #
 # fD: Darcy friction factor
 # g: gravity Acceleration [m/s2]
@@ -19,8 +19,9 @@
 # 
 
 
-
-# Utilities
+# ***************************
+# ** Utilities (UTIL) ** ----
+# *************************** 
 
 if (exists('SMD') == TRUE) { detach(UTIL) }
 
@@ -120,8 +121,21 @@ UTIL <- list(
   df.orderBy = function(df, colname, decreasing=FALSE) {
     if (missing(colname)) { stop("'colname' is not specified.") }
     df[order(df[,colname], decreasing=decreasing),]
-  }
+  },
 
+  # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+  # Probability ----
+  # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+  
+  # Create a matrix of information of cumulative distribution.
+  # 
+  # If you want to create a graph of cumulative distribution, you should use
+  # ecdf() function.
+  #   > fCP <- ecdf( c(3,76,58,24,100,1) ); plot(fCP)
+  cum.probability = function(values, decreasing=FALSE) {
+  	len <- length(values)
+  	cbind(X = sort(values, decreasing=decreasing), cum.prob = (1:len)/len)
+  }
   
 )
 
@@ -164,9 +178,9 @@ m <- list(
 
 
 
-# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-# Unit Conversion ----
-# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# *******************************
+# ** Unit Conversion (UC) ** ----
+# *******************************
 if (exists('inch2m') == TRUE) { detach(UC) }
 
 UC <- list(
@@ -214,9 +228,9 @@ if (exists('inch2m') == FALSE) { attach(UC) }
 
 
 
-# =============================================================================
-# Dimensionless Number ----
-# =============================================================================
+# ************************************
+# ** DN (Dimensionless Number) ** ----
+# ************************************
 if (exists('Reynolds') == TRUE) { detach(DN) }
 
 DN <- (function(){
@@ -311,22 +325,11 @@ if (exists('Reynolds') == FALSE) { attach(DN) }
 
 
 
-# =============================================================================
-# Probability ----
-# =============================================================================
-# Create a matrix of information of cumulative distribution.
-# 
-# If you want to create a graph of cumulative distribution, you should use
-# ecdf() function.
-#   > fCP <- ecdf( c(3,76,58,24,100,1) ); plot(fCP)
-cum.probability <- function(values, decreasing=FALSE) {
-  len <- length(values)
-  cbind(X = sort(values, decreasing=decreasing), cum.prob = (1:len)/len)
-}
 
-# =============================================================================
+
+# ***************************
 # Root-finding algorithm ----
-# =============================================================================
+# ***************************
 
 # Newton-Raphson method
 newtonRaphson <- function(fun, dFun, fD_0, tol=1e-10, itMax=10) {
@@ -389,9 +392,9 @@ bisection <- function(f, rangeFrom, rangeTo, itMax = 100, tol = 1e-7) {
 
 
 
-# =============================================================================
-# Functions for debug log. ----
-# =============================================================================
+# **********************************************
+# ** DEBUG_LOG (Functions for debug log) ** ----
+# **********************************************
 DEBUG_LOG <- (function() {
   FILE        <- "log/rlog.txt"
   
@@ -492,19 +495,17 @@ CAT <- function(..., i=0) {
 
 # _____________________________________________________________________________
 
-# ---- Utility functions for plots ----
+# ** UP (Utility functions for plots) ** ----
 
 UP <- (function(){
-  eb <- function(x0, y0, x1, y1, col, length) {
-    arrows(x0, y0, x1, y1, angle=90, code=3, length=length, col=col)
-  }
-  
-  list(errorBar = eb, 
+  list(errorBar = function(x0, y0, x1, y1, col, length) {
+         arrows(x0, y0, x1, y1, angle=90, code=3, length=length, col=col)
+       }, 
        errorBarX = function(x, y, err, col, length=0.1) {
-         errorBar(x-err, y, x+err, y, col, length)
+       	 UP$errorBar(x-err, y, x+err, y, col, length)
        },
        errorBarY = function(x, y, err, col, length=0.1) {
-         errorBar(x, y-err, x, y+err, col, length)
+       	 UP$errorBar(x, y-err, x, y+err, col, length)
        }
   )
 })()
@@ -513,9 +514,9 @@ UP <- (function(){
 
 
 
-# =============================================================================
-# Flow in a circular pipe. ----
-# =============================================================================
+# ****************************************
+# ** FCP (Flow in a circular pipe) ** ----
+# ****************************************
 
 FCP <- (function(){
   
@@ -629,13 +630,17 @@ FCP <- (function(){
 })()
 
 
-# =============================================================================
-# Heat Exchanger ----
-# =============================================================================
 
-# LMTD (logarithmic mean temperature difference)
-#   - Positive values mean heat flow from line-1 to line-2 (T1 > T2). 
-#   - Nagative values mean heat flow from line-2 to line-1 (T2 < T1).
+# Heat Exchanger 
+
+
+# ******************************************************************
+# ** LMTD (logarithmic mean temperature difference) ** ----
+#
+#   - Positive values mean heat flow from line-1 to line-2 (T1 > T2) 
+#   - Nagative values mean heat flow from line-2 to line-1 (T2 < T1)
+# ******************************************************************
+
 LMTD = (function() {
   
   assert = function(expr, msg, T1_in, T1_out, T2_in, T2_out) {
@@ -708,7 +713,7 @@ LMTD = (function() {
 
 
 
-
+## ** IdealGas ** ----
 
 IdealGas <- (function() {
 
