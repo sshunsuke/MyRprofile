@@ -38,36 +38,3 @@ plotMats2 <- function(mats, xlab='X', ylab='Y', main=NULL, type='l', log='',
   }
 }
 
-
-
-
-
-
-testNewtonMethod <- function(roughness, D, Re) {
-  fun <- function(fD) {
-    (1 / sqrt(fD)) + 2 * log10( roughness / D / 3.71 + 2.51 / Re / sqrt(fD))
-  }
-  
-  # Derivative of fun().
-  dFun <- function(fD) {
-    - fD^(-3/2) * (1/2 + 2.51 / log(10) / (2.51 / Re / sqrt(fD) + roughness / 3.71 / D) / Re)
-  }
-  
-  fD_0 <- FCP$fD.Blasius(Re)
-  newtonRaphson(fun, dFun, fD_0)
-}
-
-
-testBisection <- function(roughness, D, Re) {
-  fun <- function(fD) {
-    (1 / sqrt(fD)) + 2 * log10( roughness / D / 3.71 + 2.51 / Re / sqrt(fD))
-  }
-  
-  fD_0 <- FCP$fD.Blasius(Re)
-  bisection(fun, fD_0/2, fD_0*2)
-}
-
-
-FCP$fD.Colebrook(0.0005, 0.02, 8000)
-testNewtonMethod(0.0005, 0.02, 8000)
-testBisection(0.0005, 0.02, 8000)
