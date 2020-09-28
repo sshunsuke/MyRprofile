@@ -18,18 +18,20 @@
 # 
 # 
 
+# _____________________________________________________________________________
 
-# ***************************
-# ** Utilities (UTIL) ** ----
-# *************************** 
+
+# *****************************************************************************
+# ** UTIL (Utilities) ** ----
+# *****************************************************************************
 
 if (exists('SMD') == TRUE) { detach(UTIL) }
 
 UTIL <- list(
   
-  # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-  # Constant values ----
-  # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+  # ***************************
+  # * Constant values ----
+  # ***************************
   
   g = 9.8,                      # Gravity Acceleration (m/s2)
   R = 8.3144621,                # Gas Constant (J/K-mol)
@@ -51,9 +53,9 @@ UTIL <- list(
   Tntp = 293.15,     # (K)
   
   
-  # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-  # Properties of simple shapes. ----
-  # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+  # ***********************************
+  # * Properties of simple shapes ----
+  # ***********************************
   
   circle = list(
     area = function(r) { r * r * pi },
@@ -73,9 +75,10 @@ UTIL <- list(
   SMD = function(vD) { sum(vD^3) / sum(vD^2) },
   
   
-  # = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-  # IO clipboard ----
-  # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+  # ***********************************
+  # * IO Clipboard ----
+  # ***********************************
+  
   rcbmat = function(header, ...) {
     if (missing(header)) { header = FALSE }
     utils::read.table(file="clipboard", header=header, ...)
@@ -95,9 +98,11 @@ UTIL <- list(
   },
   
   
-  # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-  # Vector ----
-  # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+  # ***********************************
+  # * Data ----
+  # ***********************************
+  
+  # Vector
   v.indexClosestValue = function(vec, x) {
     diff <- abs(vec-x)
     which( diff == min(diff) )
@@ -107,25 +112,23 @@ UTIL <- list(
     vec[ v.indexClosestValue(vec, x) ]
   },
   
-  
-  # === === === === === === === === === === === === === === === === === === === =
-  # Matrix ----
-  # === === === === === === === === === === === === === === === === === === === =
+  # ***************
+  # Matrix
+  # ***************
   m.crev = function(mat) { mat[,ncol(mat):1] },
   m.rrev = function(mat) { mat[nrow(mat):1,] },
   
-  
-  # == == == == == == == == == == == == == == == == == == == == == == == == == ==
-  # Data Frame ----
-  # == == == == == == == == == == == == == == == == == == == == == == == == == ==
+  # ***************
+  # * Data Frame
+  # ***************
   df.orderBy = function(df, colname, decreasing=FALSE) {
     if (missing(colname)) { stop("'colname' is not specified.") }
     df[order(df[,colname], decreasing=decreasing),]
   },
 
-  # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-  # Probability ----
-  # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+  # ***********************************
+  # * Probability
+  # ***********************************
   
   # Create a matrix of information of cumulative distribution.
   # 
@@ -135,7 +138,73 @@ UTIL <- list(
   cum.probability = function(values, decreasing=FALSE) {
   	len <- length(values)
   	cbind(X = sort(values, decreasing=decreasing), cum.prob = (1:len)/len)
+  },
+  
+  
+  # ***********************************
+  # * Root-finding algorithm ----
+  # ***********************************
+  
+  # Newton-Raphson method
+  newtonRaphson = function(fun, dFun, fD_0, tol=1e-10, itMax=10) {
+    it <- 0
+    fD_n <- fD_0
+    d <- fun(fD_n) / dFun(fD_n)
+    
+    while (abs(d) >= tol) {
+      it <- it + 1
+      if (it > itMax) {
+        stop("Calculation did not converge.")
+      }
+      
+      d <- fun(fD_n) / dFun(fD_n)
+      fD_n <- fD_n - d
+    }
+    
+    fD_n
+  },
+  
+  
+  # Bisection Method
+  bisection = function(f, rangeFrom, rangeTo, itMax = 100, tol = 1e-7) {
+    # Check arguments.
+    if (rangeFrom >= rangeTo) {
+      stop("'rangeFrom' must be smaller than 'rangeTo'.")
+    } else if (f(rangeFrom) * f(rangeTo) >= 0) {
+      stop('the sign of f(rangeFrom) must be different from that of f(rangeTo)')
+    } 
+    
+    a <- rangeFrom
+    b <- rangeTo
+    c <- a
+    
+    for (i in 1:itMax) {
+      c <- (a + b) / 2 # Calculate midpoint
+      
+      # If the function equals 0 at the midpoint or the midpoint is below the desired tolerance, stop the 
+      # function and return the root.
+      if (abs(f(c)) < tol) {
+        break
+      }
+      
+      # If another iteration is required, 
+      # check the signs of the function at the points c and a and reassign
+      # a or b accordingly as the midpoint to be used in the next iteration.
+      if (sign(f(c)) == sign(f(a))) {
+        a <- c
+      } else {
+        b <- c
+      }
+    }
+    
+    if (i >= itMax) {
+      print('Too many iterations')
+    }
+    
+    return(c)
   }
+  
+  
   
 )
 
@@ -143,43 +212,8 @@ if (exists('SMD') == FALSE) { attach(UTIL) }
 
 
 
-
-
-
-
-m <- list(
-  
-  # mode()
-  
-  
-  # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-  # Greatest Common Divisor & Least Common Multiple ----
-  # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-  gcd = (function(){
-    gcd_ <- function(a, b){
-      while(a %% b != 0){
-        tmp <- b
-        b <- a %% b
-        a <- tmp
-      }
-      return(b)
-    }
-    function(...){ Reduce(gcd_, c(...)) }
-  })(),
-  
-  lcm = (function(){
-    lcm_ <- function(a, b){
-      a * b / MATH$gcd(a,b)
-    }
-    function(...){ Reduce(lcm_, c(...)) }
-  })()
-  
-)
-
-
-
 # *******************************
-# ** Unit Conversion (UC) ** ----
+# ** UC (Unit Conversion) ** ----
 # *******************************
 if (exists('inch2m') == TRUE) { detach(UC) }
 
@@ -327,70 +361,6 @@ if (exists('Reynolds') == FALSE) { attach(DN) }
 
 
 
-# ***************************
-# Root-finding algorithm ----
-# ***************************
-
-# Newton-Raphson method
-newtonRaphson <- function(fun, dFun, fD_0, tol=1e-10, itMax=10) {
-  it <- 0
-  fD_n <- fD_0
-  d <- fun(fD_n) / dFun(fD_n)
-  
-  while (abs(d) >= tol) {
-    it <- it + 1
-    if (it > itMax) {
-      stop("Calculation did not converge.")
-    }
-    
-    d <- fun(fD_n) / dFun(fD_n)
-    fD_n <- fD_n - d
-  }
-  
-  fD_n
-}
-
-
-# Bisection Method
-bisection <- function(f, rangeFrom, rangeTo, itMax = 100, tol = 1e-7) {
-  # Check arguments.
-  if (rangeFrom >= rangeTo) {
-    stop("'rangeFrom' must be smaller than 'rangeTo'.")
-  } else if (f(rangeFrom) * f(rangeTo) >= 0) {
-    stop('the sign of f(rangeFrom) must be different from that of f(rangeTo)')
-  } 
-  
-  a <- rangeFrom
-  b <- rangeTo
-  c <- a
-  
-  for (i in 1:itMax) {
-    c <- (a + b) / 2 # Calculate midpoint
-    
-    # If the function equals 0 at the midpoint or the midpoint is below the desired tolerance, stop the 
-    # function and return the root.
-    if (abs(f(c)) < tol) {
-      break
-    }
-    
-    # If another iteration is required, 
-    # check the signs of the function at the points c and a and reassign
-    # a or b accordingly as the midpoint to be used in the next iteration.
-    if (sign(f(c)) == sign(f(a))) {
-      a <- c
-    } else {
-      b <- c
-    }
-  }
-  
-  if (i >= itMax) {
-    print('Too many iterations')
-  }
-  
-  return(c)
-}
-
-
 
 # **********************************************
 # ** DEBUG_LOG (Functions for debug log) ** ----
@@ -520,7 +490,7 @@ UP <- (function(){
 
 FCP <- (function(){
   
-  fD.colebrook_ <- function(roughness, D, Re, tol=1e-8, warn=TRUE) {
+  fD.colebrook_ <- function(roughness, D, Re, tol=1e-8, itMax=10, warn=TRUE) {
     core_ <- function(roughness, D, Re) {
       if (Re <= 4000 && (warn == TRUE)) { warning("Re <= 4000 !") }
       
@@ -533,23 +503,9 @@ FCP <- (function(){
         - fD^(-3/2) * (1/2 + 2.51 / log(10) / (2.51 / Re / sqrt(fD) + roughness / 3.71 / D) / Re)
       }
       
-      fD_n <- FCP$fD.Blasius(Re)
-      d <- fun(fD_n) / dFun(fD_n)
-      
-      maxIter <- 10
-      counter <- 1
-      
       # Newton-Raphson method
-      while (abs(d) >= tol) {
-        d <- fun(fD_n) / dFun(fD_n)
-        fD_n <- fD_n - d
-        
-        if (counter >= maxIter) {
-          stop("solution was not found.")
-        }
-        counter <- counter + 1
-      }
-      
+      fD_0 <- FCP$fD.Blasius(Re)
+      fD_n <- UTIL$newtonRaphson(fun, dFun, fD_0, tol=tol, itMax=itMax) 
       fD_n
     }
     mapply(core_, roughness, D, Re)
@@ -740,4 +696,34 @@ IdealGas <- (function() {
 })()
 
 
+
+
+m <- list(
+  
+  # mode()
+  
+  
+  # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+  # Greatest Common Divisor & Least Common Multiple ----
+  # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+  gcd = (function(){
+    gcd_ <- function(a, b){
+      while(a %% b != 0){
+        tmp <- b
+        b <- a %% b
+        a <- tmp
+      }
+      return(b)
+    }
+    function(...){ Reduce(gcd_, c(...)) }
+  })(),
+  
+  lcm = (function(){
+    lcm_ <- function(a, b){
+      a * b / MATH$gcd(a,b)
+    }
+    function(...){ Reduce(lcm_, c(...)) }
+  })()
+  
+)
 

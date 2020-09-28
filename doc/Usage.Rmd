@@ -60,56 +60,25 @@ df <- data.frame(A = 1:5, B=c(3, -3, 0, 3, 1), C=c(99,88,77,66,55))
 
 ---
 
-# Data 
+# UTIL (Utilities) 
 
-## Vector
+## Simple shapes
 
+* circle
+* sphere
+* elipsoid
+* SMD(vec)
 
-* v.indexClosestValue(vec, x)
-* v.closestValue(vec, x)
 
 ```{r collapse=TRUE}
-vec <- 1:10 * 10; vec
-v.indexClosestValue(vec, 31)
-v.closestValue(vec, 75)
+radius <- 5
+circle$area(radius); circle$circumference(radius)
+sphere$volume(radius); sphere$surfaceArea(radius)
+elipsoid$volume(3,4,5)
+SMD(1:5)
 ```
 
-
-## Matrix
-
-* m.rrev(mat)
-* m.crev(mat)
-
-```{r collapse=TRUE, prompt=TRUE}
-mat <- rbind( 11:13, 21:23, 31:33 ); mat
-m.rrev( mat )
-m.crev( mat )
-```
-
-## Data Frame
-
-* df.orderBy(df, colname, decreasing=FALSE)
-
-```{r df, collapse=TRUE, prompt=TRUE}
-df_ <- data.frame(A = 1:5, B=c(3, -3, 0, 3, 1), C=c(99,88,77,66,55)); df_
-df.orderBy(df_, "B")
-df.orderBy(df_, 3)
-df.orderBy(df_, "B", decreasing=TRUE)
-```
-
-## Probability
-
-* cum.probability(values, decreasing=FALSE)
-
-```{r, collapse=TRUE}
-# If you want to create a graph of cumulative distribution, you should use ecdf() function.
-#   fCP <- ecdf( c(2, 1:5) ); plot(fCP)
-cum.probability(c(3,76,58,24,100,1,1))
-```
-
----
-
-# IO clipboard
+## IO clipboard
 
 * rcbmat(header, ...)
 * wcbmat(data, header, sep="\t", ...)
@@ -124,39 +93,52 @@ cum.probability(c(3,76,58,24,100,1,1))
 > wcbmat(data, TRUE)      # If the data includes a header, set "TRUE". 
 ```
 
+## Data
 
-# Log
+### Vector
 
-* FATAL()
-* ERROR()
-* WARN()
-* INFO()
-* DEBUG()
-* TRACE()
-* DEBUG_LOG$FILE
-* DEBUG_LOG$LEVEL
+* v.indexClosestValue(vec, x)
+* v.closestValue(vec, x)
 
-    * DEBUG_LOG$LEVEL_WARN
-    * DEBUG_LOG$LEVEL_INFO
-    * DEBUG_LOG$LEVEL_DEBUG
-    * DEBUG_LOG$LEVEL_TRACE
-
-```{r eval=FALSE}
-DEBUG_LOG$FILE <- "log.txt"              # speficy name of the log file.
-DEBUG_LOG$LEVEL <- DEBUG_LOG$LEVEL_INFO  # speficy the log level.
-
-f <- 3.45; s <- "abc"
-INFO("a = %f, s = %s", a, s)             # output a log message.
-DEBUG("log message")                     # this message is not outputed.
-
-DEBUG_LOG$LEVEL <- DEBUG_LOG$LEVEL_DEBUG
-DEBUG("log message")                     # this message is outputed.
+```{r collapse=TRUE}
+vec <- 1:10 * 10; vec
+v.indexClosestValue(vec, 31)
+v.closestValue(vec, 75)
 ```
 
+### Matrix
 
----
+* m.rrev(mat)
+* m.crev(mat)
 
-# Algorithm
+```{r collapse=TRUE, prompt=TRUE}
+mat <- rbind( 11:13, 21:23, 31:33 ); mat
+m.rrev( mat )
+m.crev( mat )
+```
+
+### Data Frame
+
+* df.orderBy(df, colname, decreasing=FALSE)
+
+```{r df, collapse=TRUE, prompt=TRUE}
+df_ <- data.frame(A = 1:5, B=c(3, -3, 0, 3, 1), C=c(99,88,77,66,55)); df_
+df.orderBy(df_, "B")
+df.orderBy(df_, 3)
+df.orderBy(df_, "B", decreasing=TRUE)
+```
+
+### Probability
+
+* cum.probability(values, decreasing=FALSE)
+
+```{r, collapse=TRUE}
+# If you want to create a graph of cumulative distribution, you should use ecdf() function.
+#   fCP <- ecdf( c(2, 1:5) ); plot(fCP)
+cum.probability(c(3,76,58,24,100,1,1))
+```
+
+## Algorithm
 
 * newtonRaphson()
 * bisection()
@@ -190,12 +172,45 @@ testBisection <- function(roughness, D, Re) {
 FCP$fD.Colebrook(0.0005, 0.02, 8000)
 testNewtonMethod(0.0005, 0.02, 8000)
 testBisection(0.0005, 0.02, 8000)
-
 ```
 
 
+---
+
+# Log
+
+* FATAL()
+* ERROR()
+* WARN()
+* INFO()
+* DEBUG()
+* TRACE()
+* DEBUG_LOG$FILE
+* DEBUG_LOG$LEVEL
+
+    * DEBUG_LOG$LEVEL_WARN
+    * DEBUG_LOG$LEVEL_INFO
+    * DEBUG_LOG$LEVEL_DEBUG
+    * DEBUG_LOG$LEVEL_TRACE
+
+```{r eval=FALSE}
+DEBUG_LOG$FILE <- "log.txt"              # speficy name of the log file.
+DEBUG_LOG$LEVEL <- DEBUG_LOG$LEVEL_INFO  # speficy the log level.
+
+f <- 3.45; s <- "abc"
+INFO("a = %f, s = %s", a, s)             # output a log message.
+DEBUG("log message")                     # this message is not outputed.
+
+DEBUG_LOG$LEVEL <- DEBUG_LOG$LEVEL_DEBUG
+DEBUG("log message")                     # this message is outputed.
+```
+
 
 ---
+
+
+
+
 
 # Example of Equation
 
