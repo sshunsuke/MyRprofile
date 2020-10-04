@@ -296,3 +296,15 @@ lapply(1:10, function(x) {x * 2})  # return vector (or matrix/array) if possible
 lapply(1:10, function(x) {1:x})    # return list if impossible.
 ```
 
+
+## For logical vectors
+
+* all()
+* any()
+
+```{r}
+all(c(TRUE, TRUE, FALSE))
+all(c(TRUE, TRUE, TRUE))
+any(c(TRUE, TRUE, FALSE))
+any(c(FALSE, FALSE, FALSE))
+```

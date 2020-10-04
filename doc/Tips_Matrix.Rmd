@@ -1,0 +1,89 @@
+---
+title: "Tips_Matrix"
+author: "Shunsuke"
+date: '`r format(Sys.time(), "%y/%m/%d %H:%M")`'
+output: 
+  html_document:
+    toc: true
+    toc_float: 
+      collapsed: false
+      smooth_scroll: false
+    number_section: true
+    theme: spacelab
+    highlight: zenburn
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, collapse=TRUE, prompt=TRUE)
+```
+
+# What is matrix in R?
+
+> Matrix is a two dimensional data structure in R programming.
+> Matrix is similar to vector but additionally contains the dimension attribute. All attributes of an object can be checked with the **attributes()** function (dimension can be checked directly with the dim() function).
+> We can check if a variable is a matrix or not with the **class()** function.
+
+https://www.datamentor.io/r-programming/matrix/
+
+Other important characters are listed below.
+
+* As with vector, all elements have a same data type
+* The data type can be checked by **typeof()**
+
+```{r, collapse=TRUE}
+m <- matrix(1:12, 3)
+attributes(m)
+class(m)
+typeof(m)
+c(is.matrix(m), is.vector(m))
+c(is.integer(m), is.logical(m), is.double(m))
+```
+
+
+----
+
+# Functions & syntax sugar
+
+## Create a matrix
+
+* matrix()
+* cbind()
+* rbind()
+
+```{r}
+matrix(1:12, 3)
+matrix(1:12, ncol=4)
+cbind(1:3, 4:6, 7:9, 10:12)
+rbind(c(1,4,7,10), c(2,5,8,11), c(3,6,9,12))
+```
+
+## Access to properties
+
+* ncol()
+* nrow()
+* dim()
+* typeof()
+* rownames()
+* colmatnames()
+
+
+## Get elements
+
+* mat[row,col]
+* mat[row,]
+* mat[,col]
+
+```{r}
+mat <- matrix(1:12, 3); mat
+mat[2,3]
+mat[1,]
+mat[c(1,3),]
+mat[2:nrow(mat),]
+mat[, 1:3]          # (1列目 ～ 3列目)
+mat[,2:ncol(mat)]   # (2列目から最後の列まで)
+mat[2:3, c(2,4)]    # (2行目・3行目 の 2列目と4列目の要素)
+```
+
+
+
