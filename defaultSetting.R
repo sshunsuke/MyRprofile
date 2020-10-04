@@ -74,6 +74,12 @@ UTIL <- list(
   # Sauter Mean Diameter (vD: Vector of diameters)
   SMD = function(vD) { sum(vD^3) / sum(vD^2) },
   
+  shape2d = list(
+    extent = function(area, rect_area) { area / rect_area },
+    solidity = function(area, hull_area) { area / hull_area },
+    circularity = function(area, peri) { 4 * pi * area / (peri^2) }
+  ),
+  
   
   # ***********************************
   # * IO Clipboard ----
