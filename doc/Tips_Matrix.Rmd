@@ -45,28 +45,130 @@ c(is.integer(m), is.logical(m), is.double(m))
 
 # Functions & syntax sugar
 
-## Create a matrix
+## Create a matrix {.tabset}
 
 * matrix()
 * cbind()
 * rbind()
+* diag()
+
+### Simplest ways
 
 ```{r}
 matrix(1:12, 3)
 matrix(1:12, ncol=4)
+matrix(1:12, 3, byrow=TRUE)
 cbind(1:3, 4:6, 7:9, 10:12)
 rbind(c(1,4,7,10), c(2,5,8,11), c(3,6,9,12))
 ```
 
-## Access to properties
+### Useful functions
 
-* ncol()
+```{r}
+diag(3)    # 3 x 3 Identity matrix
+diag(1:3)  # 3 x 3 diagonal matrix
+```
+
+
+## Get elements or properties {.tabset}
+
+* m[row,col]
 * nrow()
+* ncol()
 * dim()
 * typeof()
 * rownames()
 * colmatnames()
 
+
+```{r}
+m <- matrix(1:12, 3, byrow=TRUE)
+```
+
+$m = \begin{pmatrix} 1 & 2 & 3 & 4 \\ 5 & 6 & 7 & 8 \\ 9 & 10 & 11 & 12 \end{pmatrix}$
+
+### Elements
+
+```{r}
+m[2,3]            # Specify single element
+m[1,]             # Specify single row (vector)
+m[c(1,3),]        # Specify multiple rows
+m[2:nrow(m),]
+m[, 1:3]          # Specify multiple columns
+m[,2:ncol(m)]
+m[2:3, c(2,4)]    # Specify multiple rows and columns
+```
+
+
+### Demension or type
+
+```{r}
+nrow(m)
+ncol(m)
+dim(m)
+typeof(m)
+```
+
+### Label
+
+```{r}
+rownames(m) <- c("r1", "r2", "r3")
+rownames(m)
+colnames(m) <- c("c1", "c2", "c3", "c4")
+colnames(m)
+```
+
+
+## Edit Matrix {.tabset}
+
+```{r}
+m1 <- matrix(1:4, 2, byrow=TRUE)
+m2 <- matrix(1:4*10, 2, byrow=TRUE)
+```
+
+$m1 = \begin{pmatrix} 1 & 2 \\ 3 & 4 \end{pmatrix}, \ \ m2 = \begin{pmatrix} 10 & 20 \\ 30 & 40 \end{pmatrix}$
+
+### Concatenate
+
+```{r}
+cbind(m1, m2)
+cbind(m1, c(100,200))
+rbind(m1, m2)
+rbind(m1, c(100,200))
+```
+
+----
+
+## Algebraic calculation {.tabset}
+
+```{r}
+m1 <- matrix(1:9, 3, byrow=TRUE)
+m2 <- matrix(1:9*10, 3, byrow=TRUE)
+```
+
+$m1 = \begin{pmatrix} 1 & 2 & 3 \\ 4 & 5 & 6 \\ 7 & 8 & 9 \end{pmatrix}, \ \ m2 = \begin{pmatrix} 10 & 20 & 30 \\ 40 & 50 & 60 \\ 70 & 80 & 90 \end{pmatrix}$
+
+### Basic
+
+```{r}
+# Addition
+m1 + m2
+# Scalar multiplication 
+100 * m1
+# 
+m1 %*% m2
+```
+
+$m1 m2 = \begin{pmatrix} 1 & 2 & 3 \\ 4 & 5 & 6 \\ 7 & 8 & 9 \end{pmatrix} \begin{pmatrix} 10 & 20 & 30 \\ 40 & 50 & 60 \\ 70 & 80 & 90 \end{pmatrix} = \begin{pmatrix} 10 + 80 + 210 & 20 + 100 + 240 & 30 + 120 + 270\\ 40 + 200 + 420 & 80 + 250 + 480 & 120 + 300 + 540 \\ 70 + 320 + 630 & 140 + 400 + 720 & 210 + 480 + 810 \end{pmatrix}$
+
+### Matrix
+
+```{r}
+det(m1)
+```
+
+
+----
 
 ## Get elements
 
@@ -74,15 +176,19 @@ rbind(c(1,4,7,10), c(2,5,8,11), c(3,6,9,12))
 * mat[row,]
 * mat[,col]
 
+**Examples:**
+
+$m = \begin{pmatrix} 1 & 4 & 7 & 10 \\ 2 & 5 & 8 & 11 \\ 3 & 6 & 9 & 12 \end{pmatrix}$
+
 ```{r}
-mat <- matrix(1:12, 3); mat
-mat[2,3]
-mat[1,]
-mat[c(1,3),]
-mat[2:nrow(mat),]
-mat[, 1:3]          # (1列目 ～ 3列目)
-mat[,2:ncol(mat)]   # (2列目から最後の列まで)
-mat[2:3, c(2,4)]    # (2行目・3行目 の 2列目と4列目の要素)
+m <- matrix(1:12, 3)
+m[2,3]
+m[1,]
+m[c(1,3),]
+m[2:nrow(m),]
+m[, 1:3]          # (1列目 ～ 3列目)
+m[,2:ncol(m)]   # (2列目から最後の列まで)
+m[2:3, c(2,4)]    # (2行目・3行目 の 2列目と4列目の要素)
 ```
 
 

@@ -110,6 +110,7 @@ v[ c("x","z") ]
 ## Get elements {.tabset}
 
 * x[]
+* head()
 * tail()
 
 **Examples**
@@ -139,9 +140,10 @@ x[-2:-4]
 x[c(-2,-5)]
 ```
 
-### tail() function
+### head(), tail()
 
 ```{r}
+head(x, 3)
 tail(x, 2)            # 50 60   (指定した数の要素を末尾から)
 ```
 
@@ -236,6 +238,22 @@ z[z<50] <- c(11, 12, 13, 14) ; z
 * is.nan()
 * is.finite()
 * is.infinite()
+
+----
+
+# Algebraic calculation 
+
+```{r}
+# Addition
+1:3 + c(10, 20, 30)
+# Scalar multiplication 
+100 * 4:6
+# Inner product
+mat <- 1:3 %*% c(1, 10, 100); mat    # 1x1 matrix is returned.
+drop(mat)                            # conversion from matrix to vector. 
+```
+
+
 
 ----
 
