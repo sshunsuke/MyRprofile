@@ -75,9 +75,9 @@ UTIL <- list(
   SMD = function(vD) { sum(vD^3) / sum(vD^2) },
   
   shape2d = list(
-    extent = function(area, rect_area) { area / rect_area },
-    solidity = function(area, hull_area) { area / hull_area },
-    circularity = function(area, peri) { 4 * pi * area / (peri^2) }
+    extent = function(A, Arect) { A / Arect },
+    solidity = function(A, Ahull) { area / Ahull },
+    circularity = function(A, peri) { 4 * pi * A / (peri^2) }
   ),
   
   
@@ -146,6 +146,21 @@ UTIL <- list(
   	cbind(X = sort(values, decreasing=decreasing), cum.prob = (1:len)/len)
   },
   
+  cum.probability.guessX <- function(cp_mat, cp) {
+    diff_cp = abs(cp_mat[,"cum.prob"] - cp)
+    
+    rn = which(diff_cp == min(diff_cp))
+    if (min(diff_cp) == 0) {
+      return(cp_mat[rn,"X"])
+    }
+    
+    rn2 = ifelse(cp_mat[rn,"cum.prob"] > cp, rn-1, rn+1)
+    
+    p = sort(cp_mat[rn:rn2,"cum.prob"])
+    x = sort(cp_mat[rn:rn2,"X"])
+    
+    x[1] + (x[2] - x[1]) * (cp - p[1]) / (p[2] - p[1])
+  },
   
   # ***********************************
   # * Root-finding algorithm ----
