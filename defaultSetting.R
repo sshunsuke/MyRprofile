@@ -146,7 +146,7 @@ UTIL <- list(
   	cbind(X = sort(values, decreasing=decreasing), cum.prob = (1:len)/len)
   },
   
-  cum.probability.guessX <- function(cp_mat, cp) {
+  cum.probability.guessX = function(cp_mat, cp) {
     diff_cp = abs(cp_mat[,"cum.prob"] - cp)
     
     rn = which(diff_cp == min(diff_cp))
