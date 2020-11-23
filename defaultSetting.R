@@ -154,7 +154,14 @@ UTIL <- list(
       return(cp_mat[rn,"X"])
     }
     
-    rn2 = ifelse(cp_mat[rn,"cum.prob"] > cp, rn-1, rn+1)
+    if (length(rn) == 1) {
+      rn2 = ifelse(cp_mat[rn,"cum.prob"] > cp, rn-1, rn+1)
+    } else if (length(rn) == 2) {
+      rn2 = rn[2]
+      rn = rn[1]
+    } else {
+      stop()
+    }
     
     p = sort(cp_mat[rn:rn2,"cum.prob"])
     x = sort(cp_mat[rn:rn2,"X"])
