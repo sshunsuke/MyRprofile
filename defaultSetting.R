@@ -151,7 +151,7 @@ UTIL <- list(
     
     rn = which(diff_cp == min(diff_cp))
     if (min(diff_cp) == 0) {
-      return(cp_mat[rn,"X"])
+      return( as.numeric(cp_mat[rn,"X"]) )
     }
     
     if (length(rn) == 1) {
