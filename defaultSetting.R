@@ -496,15 +496,32 @@ CAT <- function(..., i=0) {
 # ** UP (Utility functions for plots) ** ----
 
 UP <- (function(){
-  list(errorBar = function(x0, y0, x1, y1, col, length) {
-         arrows(x0, y0, x1, y1, angle=90, code=3, length=length, col=col)
-       }, 
-       errorBarX = function(x, y, err, col, length=0.1) {
-       	 UP$errorBar(x-err, y, x+err, y, col, length)
-       },
-       errorBarY = function(x, y, err, col, length=0.1) {
-       	 UP$errorBar(x, y-err, x, y+err, col, length)
-       }
+  
+  col32_ <- function(col, alpha) {
+    rgb_ = col2rgb(col, alpha=TRUE)
+    ifelse(alpha >= 0,
+           rgb(rgb_[1], rgb_[2], rgb_[3], alpha, maxColorValue=255),
+           rgb(rgb_[1], rgb_[2], rgb_[3], maxColorValue=255))
+  }
+  
+  list(
+    # Add alpha level to a color.
+    #   col - name or hex (e.g. red, #123456)
+    #   alpha - number from 0 to 255 [optional]
+    col32 = function(cols, alphas) {
+      if (missing(alphas)) { alphas = -1 }
+      mapply(col32_, cols, alphas)
+    },
+    
+    errorBar = function(x0, y0, x1, y1, col, length) {
+      arrows(x0, y0, x1, y1, angle=90, code=3, length=length, col=col)
+    }, 
+    errorBarX = function(x, y, err, col, length=0.1) {
+      UP$errorBar(x-err, y, x+err, y, col, length)
+    },
+    errorBarY = function(x, y, err, col, length=0.1) {
+      UP$errorBar(x, y-err, x, y+err, col, length)
+    }
   )
 })()
 
