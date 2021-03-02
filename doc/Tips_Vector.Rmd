@@ -158,6 +158,7 @@ Function to get indexes satisfing given conditions:
 
 ```{r}
 which(x > 20)         # indexを取得したい時
+which(c(TRUE, FALSE, TRUE))
 ```
 
 ## Edit vectors {.tabset}
@@ -241,16 +242,73 @@ z[z<50] <- c(11, 12, 13, 14) ; z
 
 ----
 
-# Algebraic calculation 
+# Operators
+
+## Algebraic calculation {.tabset}
+
+* +, -, *, /
+* %*%
+* %o%
+
+### Addition, Multiplication
 
 ```{r}
 # Addition
 1:3 + c(10, 20, 30)
 # Scalar multiplication 
 100 * 4:6
+```
+
+### Inner product
+
+```{r}
 # Inner product
 mat <- 1:3 %*% c(1, 10, 100); mat    # 1x1 matrix is returned.
 drop(mat)                            # conversion from matrix to vector. 
+```
+
+### Outer (Tensor) product
+
+```{r}
+# Outer (Tensor) product (テンソル積)
+1:3 %o% c(1, 10, 100)
+
+matrix(1:9, 3) %o% c(1, 10, 100)
+```
+
+## Conditional Binary {.tabset}
+
+* ==
+* <, >, >=, <=
+* %in%
+* !
+* &, |
+* &&, ||
+
+
+Operators for conditional returns a logical vector except for '&&' and '||'.
+
+### Returning a vector
+
+```{r}
+x <- c(10, 20, 30, 40, 50, 60)
+
+x == 30
+x >= 30
+x %in% 22:45     # Does each element of x matches values included in 22:45?
+
+!c(TRUE, FALSE, FALSE)
+(x > 11) & (x < 43)
+```
+
+### && and ||
+
+'&&', and '||' only check the first element of vectors and return a scaler.
+
+```{r}
+c(TRUE, TRUE, FALSE) && c(TRUE, FALSE)
+c(FALSE, TRUE, TRUE) && c(TRUE, FALSE)
+c(FALSE, TRUE) || c(FALSE, TRUE)
 ```
 
 
