@@ -249,6 +249,7 @@ z[z<50] <- c(11, 12, 13, 14) ; z
 * +, -, *, /
 * %*%
 * %o%
+* expand.grid()
 
 ### Addition, Multiplication
 
@@ -279,6 +280,14 @@ $a \otimes b = \sum \sum a_i b_j$
 
 #matrix(1:9, 3) %o% c(1, 10, 100)
 ```
+
+### 直積
+
+```{r}
+expand.grid(1:3, 8:9)
+```
+
+
 
 ## Conditional Binary {.tabset}
 
@@ -324,6 +333,8 @@ c(FALSE, TRUE) || c(FALSE, TRUE)
 
 * mean()
 * median()
+* var()
+* sd()
 * max(), cummax()
 * min(), cummin()
 * sum(), cumsum()
@@ -334,22 +345,20 @@ A function for 'mode' is not prepared.
 **Examples**
 
 ```{r}
-X <- c(1,1,2,3,3,3,4,5,7,0)
+X <- c(1,1,2,3,3,3,7,4,5,0)
 ```
 
 ### Return scalar
 
 ```{r}
-sum(X)
-prod(X)
 mean(X)
 median(X)
+var(X)    # Variance (the denominator 'n-1' is used)
+sd(X)     # Standard deviation (the denominator 'n-1' is used)
 max(X)
 min(X)
-# Variance (the denominator 'n-1' is used)
-var(X)
-# Standard deviation (the denominator 'n-1' is used)
-sd(X)
+sum(X)
+prod(X)
 ```
 
 ### Return vector
