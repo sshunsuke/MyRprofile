@@ -118,7 +118,7 @@ MukherjeeBrill$checkFlowRegimeCore <- function(NGv, NLv, angle, NGvSM, NGvBS, NL
 		} else {
 			flowRegime <- 3  # slug
 		}
-	} else if (abs(angle) > deg2rad(-30)) {
+	} else if (abs(angle) > deg2rad(30)) {
 		# Downhill
 		if (NGv > NGvBS) {
 			if (NLv > NLvST) {
