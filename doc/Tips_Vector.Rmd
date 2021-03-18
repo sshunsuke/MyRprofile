@@ -242,16 +242,13 @@ z[z<50] <- c(11, 12, 13, 14) ; z
 
 ----
 
-# Operators
+# Algebraic calculation
 
-## Algebraic calculation {.tabset}
+## Addition, Multiplication
+
+$a + b, \ \alpha a$
 
 * +, -, *, /
-* %*%
-* %o%
-* expand.grid()
-
-### Addition, Multiplication
 
 ```{r}
 # Addition
@@ -260,9 +257,19 @@ z[z<50] <- c(11, 12, 13, 14) ; z
 100 * 4:6
 ```
 
-### Inner product
+## Products {.tabset}
 
 $a \cdot b = \sum a_i b_i$
+
+$a \otimes b = \sum \sum a_i b_j$
+
+$A \times B = \{ (a,b) | a \in A, b \in B \}$
+
+* %*%
+* %o%
+* expand.grid()
+
+### Inner product
 
 ```{r}
 # Inner product
@@ -272,8 +279,6 @@ drop(mat)                            # conversion from matrix to vector.
 
 ### Outer (Tensor) product
 
-$a \otimes b = \sum \sum a_i b_j$
-
 ```{r}
 # Outer (Tensor) product (テンソル積)
 1:3 %o% c(1, 10, 100)
@@ -281,15 +286,19 @@ $a \otimes b = \sum \sum a_i b_j$
 #matrix(1:9, 3) %o% c(1, 10, 100)
 ```
 
-### 直積
+### Cartesian product
 
 ```{r}
+# Cartesian product
 expand.grid(1:3, 8:9)
 ```
 
 
+----
 
-## Conditional Binary {.tabset}
+# Conditional Binary
+
+## Operators {.tabset}
 
 * ==
 * <, >, >=, <=
@@ -321,6 +330,20 @@ x %in% 22:45     # Does each element of x matches values included in 22:45?
 c(TRUE, TRUE, FALSE) && c(TRUE, FALSE)
 c(FALSE, TRUE, TRUE) && c(TRUE, FALSE)
 c(FALSE, TRUE) || c(FALSE, TRUE)
+```
+
+
+
+## Utility functions
+
+* all()
+* any()
+
+```{r}
+all(c(TRUE, TRUE, FALSE))
+all(c(TRUE, TRUE, TRUE))
+any(c(TRUE, TRUE, FALSE))
+any(c(FALSE, FALSE, FALSE))
 ```
 
 
@@ -384,15 +407,3 @@ lapply(1:10, function(x) {x * 2})  # return vector (or matrix/array) if possible
 lapply(1:10, function(x) {1:x})    # return list if impossible.
 ```
 
-
-## For logical vectors
-
-* all()
-* any()
-
-```{r}
-all(c(TRUE, TRUE, FALSE))
-all(c(TRUE, TRUE, TRUE))
-any(c(TRUE, TRUE, FALSE))
-any(c(FALSE, FALSE, FALSE))
-```
