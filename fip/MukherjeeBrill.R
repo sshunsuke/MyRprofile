@@ -63,7 +63,7 @@ MukherjeeBrill$calculateDLNs = function(vsG, vsL, D, densityG, densityL, viscosi
 	NGvBS <- 10^y
 	
 	# Downflow: Stratified (4.133)
-	z <- 0.321 - ((0.017 * NGv) - 4.267 * sin(angle)) - (2.972 * NL) - (0.033 * log10(NGv)^2) - (3.925 * sin(angle)^2)
+	z <- 0.321 - (0.017 * NGv) - (4.267 * sin(angle)) - (2.972 * NL) - (0.033 * log10(NGv)^2) - (3.925 * sin(angle)^2)
 	NLvST <- 10^z
 	
 	data.frame(
