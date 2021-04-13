@@ -215,8 +215,9 @@ MukherjeeBrill$dPdLCore <- function(D, vsG, vsL, densityG, densityL, viscosityG,
 		delta <- f$root
 		
 		# Flow area of each phase
-		AL <- circle$area(D / 2) * HL         # (4.147)
-		AG <- circle$area(D / 2) * (1 - HL)
+		A <- circle$area(D / 2)
+		AL <- A * HL         # (4.147)
+		AG <- A * (1 - HL)
 		
 		# 4.146 for hL/d
 		#   4.150 and 4.151
@@ -238,11 +239,11 @@ MukherjeeBrill$dPdLCore <- function(D, vsG, vsL, densityG, densityL, viscosityG,
 		fDG <- FCP$fD.Blasius(ReG)
 		fDL <- FCP$fD.Blasius(ReL)
 		
-		shearStressG <- fDG * densityG * vG^2 / (2*g)    # 4.153
-		shearStressL <- fDL * densityL * vL^2 / (2*g)    # 4.152
+		shearStressG <- fDG * densityG * vG^2 / 8    # 4.153
+		shearStressL <- fDL * densityL * vL^2 / 8    # 4.152
 		
 		# dPdL (4.144)
-		dPdL <- - (shearStressL * PL + shearStressG * PG) - (viscosityL * AL + viscosityG * AG) * g * sin(angle)
+		dPdL <- (shearStressL * PL + shearStressG * PG) / A + (viscosityL * AL + viscosityG * AG) * g * sin(angle)
 	} else {
 		vmix <- vsG + vsL
 		HLnoslip <- vsL / vmix
