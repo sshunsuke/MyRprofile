@@ -1,0 +1,104 @@
+---
+title: "Tips - DataFrame"
+author: "Shunsuke"
+date: '`r format(Sys.time(), "%y/%m/%d %H:%M")`'
+output: 
+  html_document:
+    toc: true
+    toc_float: 
+      collapsed: false
+      smooth_scroll: false
+    number_section: true
+    theme: spacelab
+    highlight: zenburn
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, collapse=TRUE, prompt=TRUE)
+```
+
+
+
+# What is Data Frame in R?
+
+Data frame is a data structure to make it easy to handle two dimensional data. 
+
+Strictly speaking, data frame is a **'list'** with an attribute the name and value of which are **"class"** and **"data.frame"**. However, it can be handled like a 'matrix' by pre-defined generic functions. 
+
+```{r}
+d <- data.frame(x=7:10, y=c("a", "b", "c", "d"))
+d
+typeof(d)
+class(d)
+attributes(d)
+```
+
+> Data frame is a two dimensional data structure in R. It is a special case of a list which has each component of equal length.
+
+https://www.datamentor.io/r-programming/data-frame/
+
+> Data frames are the R structures which most closely mimic the SAS or SPSS data set, i.e. a “cases by variables” matrix of data.
+> 
+> A data frame is a list of vectors, factors, and/or matrices all having the same length (number of rows in the case of matrices). In addition, a data frame generally has a names attribute labeling the variables and a row.names attribute for labeling the cases. 
+
+https://cran.r-project.org/doc/manuals/r-release/R-lang.html#Data-frame-objects
+
+
+
+----
+
+# Functions & syntax sugar
+
+## Create Data Frame
+
+Use data.frame()
+
+```{r}
+d0 <- data.frame(x=7:10, y=c("a", "b", "a", "c")); d0
+
+# Row names can be speficied by the argument of "row.names".
+d1 <- data.frame(x=7:10, y=c("a", "b", "a", "c"), row.names = c("r1", "r2", "r3", "r4")); d1
+
+# Vectors of 'string' are automatically converted to Factor
+d1$y
+# This automatic conversion can be stopped by the argument of "stringsAsFactors".
+d2 <- data.frame(x=7:10, y=c("a", "b", "a", "c"), stringsAsFactors = FALSE)
+d2$y
+```
+
+## Get elements
+
+> We can use either **[**, **[[** or **$** operator to access columns of data frame.
+> 
+> Accessing with **[[** or **$** is similar. However, it differs for **[** in that, indexing with **[** will return us a data frame but the other two will reduce it into a vector.
+
+https://www.datamentor.io/r-programming/data-frame/
+
+
+```{r}
+d <- data.frame(x=7:10, y=c("a", "b", "a", "c"), z=c(0,1.1,2,3.5)); d
+d[1]; class(d[1])
+d[[1]]; typeof(d[[1]])
+d$z; typeof(d$z)
+```
+
+> Data frames can be accessed like a matrix by providing index for row and column.
+
+https://www.datamentor.io/r-programming/data-frame/
+
+```{r}
+d[1:2]     # get the first and second columns
+d[1:2,]    # get the first and second rows
+d[1:3, 1:2]
+d[1:2, c('x','z')]
+```
+
+## Access to properties 
+
+```{r}
+
+```
+
+
+
+

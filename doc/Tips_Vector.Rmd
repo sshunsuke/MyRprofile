@@ -153,12 +153,16 @@ tail(x, 2)            # 50 60   (指定した数の要素を末尾から)
 Function to get indexes satisfing given conditions:
 
 * which()
+* which.max()
+* which.min()
 
 **Examples**
 
 ```{r}
 which(x > 20)         # indexを取得したい時
 which(c(TRUE, FALSE, TRUE))
+which.max(x)
+which.min(x)
 ```
 
 ## Edit vectors {.tabset}

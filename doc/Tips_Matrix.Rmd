@@ -135,6 +135,8 @@ m[c("r1", "r3"),]
 
 * cbind()
 * rbind()
+* t()
+* nrow():1, ncol():1
 
 ```{r}
 m1 <- matrix(1:4, 2, byrow=TRUE)
@@ -152,6 +154,13 @@ rbind(m1, m2)
 rbind(m1, c(100,200))
 ```
 
+### Change order
+
+```{r}
+t(m1)
+m1[nrow(m1):1,]
+m1[,ncol(m1):1]
+```
 
 ----
 
@@ -181,6 +190,9 @@ $A B = \begin{pmatrix} 1 & 2 \\ 3 & 4 \end{pmatrix} \begin{pmatrix} 10 & 20 \\ 3
 
 
 ## Determinant
+
+* det()
+* solve()
 
 ```{r}
 det(A)           # Determinant
