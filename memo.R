@@ -160,3 +160,59 @@ methaneProperties <- function(P, T) {
 
 methaneZstd <- methaneZ(Pstp, Tstp)
 
+
+
+
+# Friend, Daniel G., James F. Ely, and Hepburn Ingham. 1989.
+# “Thermophysical Properties of Methane.”
+# Journal of Physical and Chemical Reference Data 18 (2): 583–638.
+# https://doi.org/10.1063/1.555828.
+
+Tc = 190.551  # K
+Pc = 4.5992 * 1000 * 1000  # Pa
+rhoc = 10.139 / 1000       # mol/m3
+Zc = 0.28631
+
+
+Tr <- function(T) {
+  (Tc - T) / Tc
+}
+
+# Saturation pressure
+Psat_eq3 <- function(T) {
+  epsilon = 1.90
+  H1 = - 6.589879
+  H2 = 0.6355175
+  H3 = 11.31028
+  H4 = -10.38720
+  H5 = 3.393075
+  
+  Tr <- (Tc - T) / Tc
+  
+  c1 <- H1 * Tr / (1-Tr)
+  Pc * exp(c1 + H2*Tr + H3*(Tr^epsilon) + H4*(Tr^2) + H5*(Tr^3))
+}
+
+eq_5a <- function(T) {
+  beta = 0.355
+  J0 = -0.7377483
+  J1 = -1.241532
+  J2 = -1.649972
+  J3 = 2.281949
+  J4 = 1.439570
+  
+  
+  Tr <- (Tc - T) / Tc
+  Psat <- Psat_eq3(T)
+  Psat_r <- Psat / Pc
+  
+  
+  c1 = (1 - Tr)^7
+  c2 = 1 - ((1 - Tr)^8 / Psat_r)
+  c3 = (1 - 1/Zc)
+  c4 = J0*(Tr^beta) + J1*(Tr^(2*beta)) + J2*(Tr+Tr^4) + J3*(Tr^2)
+  c5 = 1 + J4*Tr
+  
+  rhoc * c1 * (1 - 1/Zc * c2 + c3 * c4 / c5)^(-1)
+}
+
