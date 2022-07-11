@@ -281,7 +281,7 @@ UC <- list(
   kg2lbm = function(kg) { kg / 0.45359237 },         # kg -> pound-mass
   
   # Density
-  kgcbm2lbcbft = function(kgcbm) { kgcbm * 0.062428}  # kg/m3 -> lb/ft3 (pound per cubic foot)
+  kgcbm2lbcbft = function(kgcbm) { kgcbm * 0.062428},  # kg/m3 -> lb/ft3 (pound per cubic foot)
   
   
   # Angular velocity <-> Frequency
