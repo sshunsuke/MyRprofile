@@ -256,6 +256,12 @@ UC <- list(
   ft2m   = function(ft) { ft * 0.3048 },
   m2ft   = function(m) { m / 0.3048 },
   
+  # Volume
+  bbl2m3 = function(bbl)  { bbl * 0.158987294928 },   # (oil) barrel -> m3
+  m32bbl = function(m3)   { m3 / 0.158987294928},     # m3 -> (oil) barrel
+  bbl2gal = function(bbl) { bbl * 42 },               # (oil) barrel -> (US) bbl
+  gal2bbl = function(gal) { gal / 42 },               # (US) bbl -> (oil) barrel
+  
   # Temperature
   K2C = function(K) { K - 273.15 },
   C2K = function(C) { C + 273.15 },
@@ -265,17 +271,26 @@ UC <- list(
   R2F = function(R) { R - 459.67 },
   
   # Pressure
-  psi2Pa = function(psi) { psi * 6894.76 },
-  Pa2psi = function(Pa)  { Pa / 6894.76 },
+  psi2Pa = function(psi) { psi * 6894.76 },  # psi (pound-force per square inch) -> Pa
+  Pa2psi = function(Pa)  { Pa / 6894.76 },   # Pa -> psi
+  atm2Pa = function(atm) { atm * 101325 },   # atm -> Pa
+  Pa2atm = function(Pa)  { Pa / 101325 },    # Pa -> atm
   
   # Weight
-  lbm2kg = function(lbm) { lbm * 0.453592 },
+  lbm2kg = function(lbm) { lbm * 0.45359237 },       # pound-mass -> kg
+  kg2lbm = function(kg) { kg / 0.45359237 },         # kg -> pound-mass
   
-  # 
+  # Density
+  kgcbm2lbcbft = function(kgcbm) { kgcbm * 0.062428}  # kg/m3 -> lb/ft3 (pound per cubic foot)
+  
+  
+  # Angular velocity <-> Frequency
   radps2Hz = function(radps) { radps / (2 * pi) },  # rad/s -> Hz
   Hz2radps = function(Hz) { Hz * (2 * pi) },        # Hz -> rad/s
   
-  # Viscoisty
+  # 
+  
+  # Viscosity
   cP2Pas = function(cP) {cP / 1000},
   Pas2cP = function(Pas) {Pas * 1000},
   
