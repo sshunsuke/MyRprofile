@@ -39,6 +39,29 @@ plotMats2 <- function(mats, xlab='X', ylab='Y', main=NULL, type='l', log='',
 }
 
 
+# Wilke and Chang (1955)
+#
+# temperature: Temperature [K]
+# mvg: Molar Volume of gas (solute) at normal boiling point [m3/mol]
+# mml: Molar Mass of Liquid [kg/mol]
+# viscosity: Viscosity of liquid phase [Pa.s]
+# x: association parameter ()
+diffusivity_Wilke <- function(temperature, mvg, mml, viscosity, x) {
+  # Unit conversion
+  c_mvg = mvg * 1000 * 1000           # [m3/mol -> [cc/mol]
+  c_mml = mml * 1000                  # [kg/mol -> [g/mol]
+  c_viscosity = viscosity * 1000      # [Pa-s]  -> [CP] 
+  
+  # Unit of the diffusivity is "cm2/sec"
+  diffusivity = 7.4e-8 * sqrt(x * c_mml) * temperature / (c_viscosity * (c_mvg ^ 0.6))
+  
+  diffusivity / 100 / 100             # [cm2/sec] -> [m2/sec]
+}
+
+# diffusivity_Wilke(273.15+4, (29.6/1000/1000), 0.016, 0.0010016, 2.6)
+
+
+
 
 
 
