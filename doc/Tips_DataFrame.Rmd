@@ -93,6 +93,27 @@ d[1:3, 1:2]
 d[1:2, c('x','z')]
 ```
 
+## Add columns
+
+You can use cbind().
+
+
+```{r}
+d <- data.frame(x=7:10, y=c("a", "b", "c", "d"))
+cbind(d, newcol=c("Z", "Y", "X", "V"))
+```
+
+## Add columns (destructive)
+
+There are two methods: $ and brackets.
+
+```{r}
+d$nc1 = 1:4
+d['nc2'] = c(9,7,5,3)
+d
+```
+
+
 ## Access to properties 
 
 ```{r}
