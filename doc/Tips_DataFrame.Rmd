@@ -26,11 +26,11 @@ Data frame is a data structure to make it easy to handle two dimensional data.
 Strictly speaking, data frame is a **'list'** with an attribute the name and value of which are **"class"** and **"data.frame"**. However, it can be handled like a 'matrix' by pre-defined generic functions. 
 
 ```{r}
-d <- data.frame(x=7:10, y=c("a", "b", "c", "d"))
-d
-typeof(d)
-class(d)
-attributes(d)
+df <- data.frame(x=7:10, y=c("a", "b", "c", "d"))
+df
+typeof(df)
+class(df)
+attributes(df)
 ```
 
 > Data frame is a two dimensional data structure in R. It is a special case of a list which has each component of equal length.
@@ -76,10 +76,10 @@ https://www.datamentor.io/r-programming/data-frame/
 
 
 ```{r}
-d <- data.frame(x=7:10, y=c("a", "b", "a", "c"), z=c(0,1.1,2,3.5)); d
-d[1]; class(d[1])
-d[[1]]; typeof(d[[1]])
-d$z; typeof(d$z)
+d3 <- data.frame(x=7:10, y=c("a", "b", "a", "c"), z=c(0,1.1,2,3.5)); d3
+d3[1]; class(d3[1])
+d3[[1]]; typeof(d3[[1]])
+d3$z; typeof(d3$z)
 ```
 
 > Data frames can be accessed like a matrix by providing index for row and column.
@@ -87,20 +87,57 @@ d$z; typeof(d$z)
 https://www.datamentor.io/r-programming/data-frame/
 
 ```{r}
-d[1:2]     # get the first and second columns
-d[1:2,]    # get the first and second rows
-d[1:3, 1:2]
-d[1:2, c('x','z')]
+d3[1:2]     # get the first and second columns
+d3[1:2,]    # get the first and second rows
+d3[1:3, 1:2]
+d3[1:2, c('x','z')]
 ```
 
-## Add columns
 
-You can use cbind().
+## Access to properties {.tabset}
 
+* nrow()
+* ncol()
+* dim()
+* typeof()
+* rownames()
+* colmatnames()
+
+
+
+### Demension or type
+
+```{r}
+nrow(d3)
+ncol(d3)
+dim(d3)
+typeof(d3)
+```
+
+### Label
+
+```{r}
+rownames(d3) <- c("r1", "r2", "r3", "r4")
+rownames(d3)
+colnames(d3) <- c("c1", "c2", "c3")
+colnames(d3)
+
+# Specify rows and columns by using labels
+d3["r2","c3"]
+d3[c("r1", "r3"),]
+```
+
+
+
+
+## Add columns or rows
+
+You can use cbind() or rbind().
 
 ```{r}
 d <- data.frame(x=7:10, y=c("a", "b", "c", "d"))
 cbind(d, newcol=c("Z", "Y", "X", "V"))
+rbind(d, list(100, "X"))
 ```
 
 ## Add columns (destructive)
@@ -114,11 +151,8 @@ d
 ```
 
 
-## Access to properties 
 
-```{r}
 
-```
 
 
 
